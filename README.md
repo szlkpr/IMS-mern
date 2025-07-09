@@ -89,16 +89,6 @@ GET	/api/export/csv	Export inventory as CSV
 
     Add support for multiple warehouses and suppliers
 
-📍 Installation & Setup
-
-git clone https://github.com/szlkpr/inventory-management-system-backend.git
-cd inventory-management-system-backend
-npm install
-cp .env.example .env   # and fill in the values
-npm start
-
-    The API will run on http://localhost:5000 by default
-
 🙋‍♂️ About Me
 
 I’m a passionate backend developer focused on building reliable and scalable systems. This project showcases my ability to create production-ready REST APIs with security, performance, and real-world features.
