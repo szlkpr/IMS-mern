@@ -69,6 +69,18 @@ const productSchema = new mongoose.Schema({
         trim: true,
         default: '' // e.g., "Universal, Perfect Fit, Easy Installation"
     },
+    
+    // Low stock threshold for alerts
+    lowStockThreshold: {
+        type: Number,
+        default: 5 // Alert when stock falls below this number
+    },
+    
+    // Buying/cost price for profit calculations
+    buyingPrice: {
+        type: Number,
+        default: 0
+    },
 }, { timestamps: true });
 
 productSchema.pre("save", function (next) {

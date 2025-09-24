@@ -3,7 +3,6 @@ import { ApiError } from "../utils/apiError.js";
 import { ApiResponse } from "../utils/apiResponse.js";
 import { Sale } from "../models/sale.model.js";
 import { Product } from "../models/product.model.js";
-import { Purchase } from "../models/purchase.model.js";
 
 // Get comprehensive dashboard metrics
 const getDashboardMetrics = asyncHandler(async (req, res) => {
@@ -24,8 +23,8 @@ const getDashboardMetrics = asyncHandler(async (req, res) => {
             $group: {
                 _id: null,
                 totalSales: { $sum: 1 },
-                totalRevenue: { $sum: "$totalAmount" },
-                averageOrderValue: { $avg: "$totalAmount" }
+                totalRevenue: { $sum: "$saleCost" },
+                averageOrderValue: { $avg: "$saleCost" }
             }
         }
     ]);
@@ -36,7 +35,7 @@ const getDashboardMetrics = asyncHandler(async (req, res) => {
             $group: {
                 _id: null,
                 totalProducts: { $sum: 1 },
-                totalInventoryValue: { $sum: { $multiply: ["$stock", "$sellingPrice"] } },
+                totalInventoryValue: { $sum: { $multiply: ["$stock", "$retailPrice"] } },
                 lowStockItems: {
                     $sum: {
                         $cond: [{ $lt: ["$stock", "$lowStockThreshold"] }, 1, 0]
@@ -64,7 +63,7 @@ const getDashboardMetrics = asyncHandler(async (req, res) => {
                     year: { $year: "$createdAt" },
                     month: { $month: "$createdAt" }
                 },
-                revenue: { $sum: "$totalAmount" },
+                revenue: { $sum: "$saleCost" },
                 sales: { $sum: 1 }
             }
         },
@@ -81,13 +80,13 @@ const getDashboardMetrics = asyncHandler(async (req, res) => {
             }
         },
         {
-            $unwind: "$items"
+            $unwind: "$soldProducts"
         },
         {
             $group: {
-                _id: "$items.product",
-                totalQuantity: { $sum: "$items.quantity" },
-                totalRevenue: { $sum: { $multiply: ["$items.quantity", "$items.price"] } }
+                _id: "$soldProducts.productId",
+                totalQuantity: { $sum: "$soldProducts.quantity" },
+                totalRevenue: { $sum: { $multiply: ["$soldProducts.quantity", "$soldProducts.price"] } }
             }
         },
         {
@@ -147,20 +146,8 @@ const getSalesReport = asyncHandler(async (req, res) => {
                 createdAt: { $gte: start, $lte: end }
             }
         },
-        {
-            $lookup: {
-                from: "users",
-                localField: "soldBy",
-                foreignField: "_id",
-                as: "soldBy"
-            }
-        },
-        {
-            $unwind: {
-                path: "$soldBy",
-                preserveNullAndEmptyArrays: true
-            }
-        },
+        // Note: soldBy field doesn't exist in current Sale model
+        // Remove this lookup for now
         {
             $sort: { createdAt: -1 }
         }
@@ -211,7 +198,7 @@ const getInventoryReport = asyncHandler(async (req, res) => {
         },
         {
             $addFields: {
-                inventoryValue: { $multiply: ["$stock", "$sellingPrice"] },
+                inventoryValue: { $multiply: ["$stock", "$retailPrice"] },
                 stockStatus: {
                     $cond: {
                         if: { $eq: ["$stock", 0] },
@@ -315,26 +302,12 @@ const exportSalesData = asyncHandler(async (req, res) => {
             }
         },
         {
-            $lookup: {
-                from: "users",
-                localField: "soldBy",
-                foreignField: "_id",
-                as: "soldBy"
-            }
-        },
-        {
-            $unwind: {
-                path: "$soldBy",
-                preserveNullAndEmptyArrays: true
-            }
-        },
-        {
-            $unwind: "$items"
+            $unwind: "$soldProducts"
         },
         {
             $lookup: {
                 from: "products",
-                localField: "items.product",
+                localField: "soldProducts.productId",
                 foreignField: "_id",
                 as: "product"
             }
@@ -352,12 +325,12 @@ const exportSalesData = asyncHandler(async (req, res) => {
                     }
                 },
                 productName: "$product.name",
-                quantity: "$items.quantity",
-                unitPrice: "$items.price",
-                totalPrice: { $multiply: ["$items.quantity", "$items.price"] },
-                soldBy: "$soldBy.name",
-                paymentMethod: 1,
-                customerInfo: 1
+                quantity: "$soldProducts.quantity",
+                unitPrice: "$soldProducts.price",
+                totalPrice: { $multiply: ["$soldProducts.quantity", "$soldProducts.price"] },
+                customerName: 1,
+                customerContact: 1,
+                saleCost: 1
             }
         },
         {
@@ -405,9 +378,10 @@ const exportInventoryData = asyncHandler(async (req, res) => {
                 category: "$category.name",
                 stock: 1,
                 lowStockThreshold: 1,
-                sellingPrice: 1,
+                retailPrice: 1,
+                wholesalePrice: 1,
                 buyingPrice: 1,
-                inventoryValue: { $multiply: ["$stock", "$sellingPrice"] },
+                inventoryValue: { $multiply: ["$stock", "$retailPrice"] },
                 stockStatus: {
                     $cond: {
                         if: { $eq: ["$stock", 0] },
