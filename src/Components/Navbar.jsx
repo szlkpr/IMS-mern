@@ -51,6 +51,7 @@ const Navbar = ({ onLogout }) => {
         <li style={liStyle}><Link to="/inventory" style={linkStyle}>Inventory</Link></li>
         <li style={liStyle}><Link to="/purchases" style={linkStyle}>Purchases</Link></li>
         <li style={liStyle}><Link to="/sales" style={linkStyle}>Sales</Link></li>
+        <li style={liStyle}><Link to="/categories" style={linkStyle}>Categories</Link></li>
         <li style={liStyle}><Link to="/reports" style={linkStyle}>Reports</Link></li>
         <li style={liStyle}><Link to="/profile" style={linkStyle}>Profile</Link></li>
       </ul>

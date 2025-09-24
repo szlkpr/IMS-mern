@@ -8,6 +8,7 @@ import SalesPage from './Pages/Sales';
 import PurchasesPage from './Pages/Purchases';
 import ProfilePage from './Pages/Profile';
 import ReportsPage from './Pages/Reports';
+import CategoriesPage from './Pages/Categories';
 import MainLayout from './Components/MainLayout';
 
 function App() {
@@ -37,6 +38,7 @@ function App() {
           <Route path="/purchases" element={<PurchasesPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/categories" element={<CategoriesPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to={isAuthenticated ? "/" : "/login"} />} />

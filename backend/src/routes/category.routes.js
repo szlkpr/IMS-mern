@@ -16,7 +16,8 @@ router.route("/")
 
 router.route("/:id")
     .get(getCategory) // Public
-    .patch(verifyJWT, updateCategory) // Admin only
+    .put(verifyJWT, updateCategory) // Admin only
+    .patch(verifyJWT, updateCategory) // Admin only (for compatibility)
     .delete(verifyJWT, deleteCategory); // Admin only
 
 export default router;

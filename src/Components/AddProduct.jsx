@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import apiClient from "../api";
 
 export default function AddProduct({ onAdd }) {
@@ -18,6 +18,20 @@ export default function AddProduct({ onAdd }) {
     buyingPrice: ""
   });
   const [message, setMessage] = useState("");
+  const [categories, setCategories] = useState([]);
+
+  // Fetch categories on component mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await apiClient.get('/categories');
+        setCategories(response.data.data.docs || []);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const handleChange = e => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -224,13 +238,19 @@ export default function AddProduct({ onAdd }) {
         
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-          <input 
+          <select
             name="category" 
-            placeholder="Product category" 
             value={form.category} 
             onChange={handleChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          >
+            <option value="">Select a category (optional)</option>
+            {categories.map(category => (
+              <option key={category._id} value={category._id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
         </div>
         
         {/* Submit Button */}
