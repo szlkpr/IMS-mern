@@ -16,7 +16,11 @@ const createProduct = asyncHandler(async (req, res) => {
         wholesaleThreshold,
         stock,
         category,
-        barcode
+        barcode,
+        // Optional new fields
+        brand,
+        variant,
+        compatibility
     } = req.body;
 
     // 2. Robust Validation
@@ -51,7 +55,11 @@ const createProduct = asyncHandler(async (req, res) => {
         wholesaleThreshold,
         stock,
         category,
-        barcode: barcode || undefined // Ensure barcode is not an empty string if not provided
+        barcode: barcode || undefined, // Ensure barcode is not an empty string if not provided
+        // Optional new fields
+        brand: brand || '',
+        variant: variant || '',
+        compatibility: compatibility || ''
     });
 
     if (!product) {
@@ -87,7 +95,10 @@ const getAllProducts = asyncHandler(async (req, res) => {
     if (search) {
         matchStage.$or = [
             { name: { $regex: search, $options: 'i' } },
-            { description: { $regex: search, $options: 'i' } }
+            { description: { $regex: search, $options: 'i' } },
+            { brand: { $regex: search, $options: 'i' } },
+            { variant: { $regex: search, $options: 'i' } },
+            { compatibility: { $regex: search, $options: 'i' } }
         ];
     }
 
@@ -102,6 +113,24 @@ const getAllProducts = asyncHandler(async (req, res) => {
     }
     pipeline.push({ $match: matchStage });
 
+    // --- Add lookup stage to populate category ---
+    pipeline.push({
+        $lookup: {
+            from: "categories",
+            localField: "category",
+            foreignField: "_id",
+            as: "category"
+        }
+    });
+
+    // --- Unwind category array to get single object ---
+    pipeline.push({
+        $unwind: {
+            path: "$category",
+            preserveNullAndEmptyArrays: true
+        }
+    });
+
     // --- Add a sort stage ---
     const sortStage = {};
     sortStage[sortBy] = sortType === 'asc' ? 1 : -1;
@@ -111,8 +140,7 @@ const getAllProducts = asyncHandler(async (req, res) => {
 
     const options = {
         page: parseInt(page, 10),
-        limit: parseInt(limit, 10),
-        populate: "category" // The plugin can populate the category details for us
+        limit: parseInt(limit, 10)
     };
 
     const products = await Product.aggregatePaginate(aggregate, options);
@@ -147,7 +175,11 @@ const updateProduct = asyncHandler(async (req, res) => {
         wholesaleThreshold,
         stock,
         category,
-        barcode
+        barcode,
+        // Optional new fields
+        brand,
+        variant,
+        compatibility
     } = req.body;
 
     // Find the product to be updated
@@ -177,6 +209,11 @@ const updateProduct = asyncHandler(async (req, res) => {
     if (stock !== undefined) product.stock = stock;
     // Use hasOwnProperty to allow setting barcode to null or an empty string to remove it
     if (Object.prototype.hasOwnProperty.call(req.body, 'barcode')) product.barcode = barcode || undefined;
+    
+    // Update new optional fields
+    if (Object.prototype.hasOwnProperty.call(req.body, 'brand')) product.brand = brand || '';
+    if (Object.prototype.hasOwnProperty.call(req.body, 'variant')) product.variant = variant || '';
+    if (Object.prototype.hasOwnProperty.call(req.body, 'compatibility')) product.compatibility = compatibility || '';
 
     const updatedProduct = await product.save({ validateBeforeSave: true });
 

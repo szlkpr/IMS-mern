@@ -48,6 +48,27 @@ const productSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    
+    // Optional Brand information
+    brand: {
+        type: String,
+        trim: true,
+        default: ''
+    },
+    
+    // Optional Vehicle Variant compatibility (comma-separated)
+    variant: {
+        type: String,
+        trim: true,
+        default: '' // e.g., "Honda City, Toyota Corolla"
+    },
+    
+    // Optional Compatibility information
+    compatibility: {
+        type: String,
+        trim: true,
+        default: '' // e.g., "Universal, Perfect Fit, Easy Installation"
+    },
 }, { timestamps: true });
 
 productSchema.pre("save", function (next) {
