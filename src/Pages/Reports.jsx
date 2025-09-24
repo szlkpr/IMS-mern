@@ -1,5 +1,12 @@
 import { useState, useEffect } from 'react';
 import apiClient from '../api';
+import { 
+  SalesTrendChart, 
+  TopProductsChart, 
+  InventoryStatusChart,
+  CategoryChart,
+  StockValueChart 
+} from '../Components/Charts';
 
 export default function Reports() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -241,7 +248,7 @@ export default function Reports() {
           {/* Key Metrics Cards */}
           {dashboardMetrics && (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <div className="bg-white p-6 rounded-lg shadow-md">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">Total Sales</h3>
                   <p className="text-3xl font-bold text-blue-600">{dashboardMetrics.sales.totalSales}</p>
@@ -273,34 +280,55 @@ export default function Reports() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Inventory Status */}
+              {/* Charts Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                {/* Sales Trend Chart */}
                 <div className="bg-white p-6 rounded-lg shadow-md">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Inventory Status</h3>
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Total Products</span>
-                      <span className="font-semibold">{dashboardMetrics.inventory.totalProducts}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-yellow-600">Low Stock Items</span>
-                      <span className="font-semibold text-yellow-600">{dashboardMetrics.inventory.lowStockItems}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-red-600">Out of Stock</span>
-                      <span className="font-semibold text-red-600">{dashboardMetrics.inventory.outOfStockItems}</span>
-                    </div>
-                  </div>
+                  <SalesTrendChart 
+                    data={dashboardMetrics.monthlyRevenue} 
+                    title="Sales Trend Analysis"
+                  />
                 </div>
-
-                {/* Top Products */}
+                
+                {/* Inventory Status Chart */}
                 <div className="bg-white p-6 rounded-lg shadow-md">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Selling Products</h3>
+                  <InventoryStatusChart 
+                    data={dashboardMetrics.inventory} 
+                    title="Stock Status Distribution"
+                  />
+                </div>
+              </div>
+              
+              {/* Second Row of Charts */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Top Products Chart */}
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                  <TopProductsChart 
+                    data={dashboardMetrics.topProducts} 
+                    title="Best Performing Products"
+                  />
+                </div>
+                
+                {/* Top Products List */}
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Products Details</h3>
                   <div className="space-y-3">
                     {dashboardMetrics.topProducts.slice(0, 5).map((product, index) => (
-                      <div key={product._id} className="flex justify-between items-center">
-                        <span className="text-gray-600 truncate">{product.productName}</span>
-                        <span className="font-semibold">{product.totalQuantity} sold</span>
+                      <div key={product._id} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
+                        <div className="flex items-center">
+                          <span className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold mr-3 ${
+                            index === 0 ? 'bg-yellow-500' :
+                            index === 1 ? 'bg-gray-400' :
+                            index === 2 ? 'bg-orange-600' : 'bg-blue-500'
+                          }`}>
+                            {index + 1}
+                          </span>
+                          <div>
+                            <span className="text-gray-900 font-medium truncate">{product.productName}</span>
+                            <p className="text-xs text-gray-500">₹{product.totalRevenue.toLocaleString()} revenue</p>
+                          </div>
+                        </div>
+                        <span className="font-semibold text-blue-600">{product.totalQuantity} sold</span>
                       </div>
                     ))}
                   </div>

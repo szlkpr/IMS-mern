@@ -1,5 +1,11 @@
 import { useState, useEffect } from 'react';
 import apiClient from '../api';
+import { 
+  SalesTrendChart, 
+  TopProductsChart, 
+  InventoryStatusChart, 
+  RevenueChart 
+} from '../Components/Charts';
 
 export default function Dashboard() {
   const [metrics, setMetrics] = useState(null);
@@ -172,39 +178,75 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Bottom Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Top Selling Products */}
+          {/* Charts Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            {/* Sales Trend Chart */}
             <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Selling Products</h3>
-              {metrics.topProducts && metrics.topProducts.length > 0 ? (
-                <div className="space-y-3">
-                  {metrics.topProducts.slice(0, 5).map((product, index) => (
-                    <div key={product._id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
-                      <div className="flex items-center">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold mr-3 ${
-                          index === 0 ? 'bg-yellow-500' :
-                          index === 1 ? 'bg-gray-400' :
-                          index === 2 ? 'bg-orange-600' : 'bg-blue-500'
-                        }`}>
-                          {index + 1}
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-900 truncate">{product.productName}</p>
-                          <p className="text-sm text-gray-500">₹{product.totalRevenue.toLocaleString()} revenue</p>
-                        </div>
+              <SalesTrendChart 
+                data={metrics.monthlyRevenue} 
+                title="Monthly Sales Trend"
+              />
+            </div>
+            
+            {/* Inventory Status Chart */}
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <InventoryStatusChart 
+                data={metrics.inventory} 
+                title="Inventory Status Overview"
+              />
+            </div>
+          </div>
+          
+          {/* Revenue and Products Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Revenue Chart */}
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <RevenueChart 
+                salesData={metrics.monthlyRevenue} 
+                title="Revenue vs Sales Count"
+              />
+            </div>
+            
+            {/* Top Selling Products Chart */}
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <TopProductsChart 
+                data={metrics.topProducts} 
+                title="Top Selling Products"
+              />
+            </div>
+          </div>
+          
+          {/* Detailed Product List */}
+          <div className="mt-6 bg-white p-6 rounded-lg shadow-md">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Products Details</h3>
+            {metrics.topProducts && metrics.topProducts.length > 0 ? (
+              <div className="space-y-3">
+                {metrics.topProducts.slice(0, 5).map((product, index) => (
+                  <div key={product._id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
+                    <div className="flex items-center">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold mr-3 ${
+                        index === 0 ? 'bg-yellow-500' :
+                        index === 1 ? 'bg-gray-400' :
+                        index === 2 ? 'bg-orange-600' : 'bg-blue-500'
+                      }`}>
+                        {index + 1}
                       </div>
-                      <div className="text-right">
-                        <p className="font-semibold text-gray-900">{product.totalQuantity}</p>
-                        <p className="text-sm text-gray-500">sold</p>
+                      <div>
+                        <p className="font-medium text-gray-900 truncate">{product.productName}</p>
+                        <p className="text-sm text-gray-500">₹{product.totalRevenue.toLocaleString()} revenue</p>
                       </div>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-500 text-center py-4">No sales data available</p>
-              )}
-            </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-gray-900">{product.totalQuantity}</p>
+                      <p className="text-sm text-gray-500">sold</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 text-center py-4">No sales data available</p>
+            )}
+          </div>
 
             {/* Stock Alerts */}
             <div className="bg-white p-6 rounded-lg shadow-md">
