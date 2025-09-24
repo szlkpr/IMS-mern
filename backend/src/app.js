@@ -4,6 +4,7 @@ import categoryRoutes from "./routes/category.routes.js";
 import productRoutes from "./routes/product.routes.js";
 import saleRoutes from "./routes/sale.routes.js";
 import purchaseRoutes from "./routes/purchase.routes.js";
+import reportsRoutes from "./routes/reports.routes.js";
 import cookieParser from "cookie-parser"
 import express from "express"
 import cors from "cors"
@@ -26,5 +27,6 @@ app.use("/api/v1/categories", categoryRoutes)
 app.use("/api/v1/products", productRoutes)
 app.use("/api/v1/sales", saleRoutes)
 app.use("/api/v1/purchases", purchaseRoutes)
+app.use("/api/v1/reports", reportsRoutes)
 
 export default app
