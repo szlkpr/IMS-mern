@@ -7,18 +7,17 @@ export default function AddProduct({ onAdd }) {
     description: "",
     retailPrice: "",
     wholesalePrice: "",
-    wholesaleThreshold: "",
     stock: "",
     category: "",
     barcode: "",
     brand: "",
     variant: "",
-    compatibility: "",
-    lowStockThreshold: "5",
-    buyingPrice: ""
+    compatibility: [""], // Changed to array for multiple inputs
+    lowStockThreshold: "5"
   });
   const [message, setMessage] = useState("");
   const [categories, setCategories] = useState([]);
+  const [isCollapsed, setIsCollapsed] = useState(true);
 
   // Fetch categories on component mount
   useEffect(() => {
@@ -37,232 +36,391 @@ export default function AddProduct({ onAdd }) {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  // Handle compatibility array changes
+  const handleCompatibilityChange = (index, value) => {
+    const newCompatibility = [...form.compatibility];
+    newCompatibility[index] = value;
+    setForm({ ...form, compatibility: newCompatibility });
+  };
+
+  // Add new compatibility input
+  const addCompatibilityField = () => {
+    setForm({ ...form, compatibility: [...form.compatibility, ""] });
+  };
+
+  // Remove compatibility input
+  const removeCompatibilityField = (index) => {
+    if (form.compatibility.length > 1) {
+      const newCompatibility = form.compatibility.filter((_, i) => i !== index);
+      setForm({ ...form, compatibility: newCompatibility });
+    }
+  };
+
   const handleSubmit = async e => {
-  e.preventDefault();
-  setMessage("Adding...");
-  try {
-    await apiClient.post("/products", form);
-    setMessage("Product added!");
-    setForm({
+    e.preventDefault();
+    setMessage("Adding...");
+    
+    // Basic validation
+    if (!form.name.trim()) {
+      setMessage("Product name is required");
+      return;
+    }
+    
+    if (!form.description.trim()) {
+      setMessage("Product description is required");
+      return;
+    }
+    
+    if (!form.category) {
+      setMessage("Please select a category");
+      return;
+    }
+    
+    if (!form.retailPrice || parseFloat(form.retailPrice) <= 0) {
+      setMessage("Valid retail price is required");
+      return;
+    }
+    
+    if (!form.wholesalePrice || parseFloat(form.wholesalePrice) <= 0) {
+      setMessage("Valid wholesale price is required");
+      return;
+    }
+    
+    if (!form.stock || parseInt(form.stock) < 0) {
+      setMessage("Valid stock quantity is required");
+      return;
+    }
+    
+    try {
+      // Clean and prepare form data - backend expects these required fields
+      const submitData = {
+        name: form.name.trim(),
+        description: form.description.trim(),
+        category: form.category,
+        retailPrice: parseFloat(form.retailPrice),
+        wholesalePrice: parseFloat(form.wholesalePrice),
+        wholesaleThreshold: 1, // Backend still expects this, set default
+        stock: parseInt(form.stock),
+        lowStockThreshold: parseInt(form.lowStockThreshold) || 5
+      };
+      
+      // Add optional fields only if they have values
+      // Don't send barcode field at all if empty to avoid MongoDB duplicate null key error
+      const trimmedBarcode = form.barcode.trim();
+      if (trimmedBarcode) {
+        submitData.barcode = trimmedBarcode;
+      }
+      // Note: Not including barcode field when empty should prevent duplicate null key error
+      
+      if (form.brand.trim()) submitData.brand = form.brand.trim();
+      if (form.variant.trim()) submitData.variant = form.variant.trim();
+      
+      const compatibilityStr = form.compatibility.filter(c => c.trim()).join(', ');
+      if (compatibilityStr) submitData.compatibility = compatibilityStr;
+      
+      console.log('Submitting product data:', submitData);
+      
+      await apiClient.post("/products", submitData);
+      setMessage("Product added successfully!");
+      setForm({
         name: "",
         description: "",
         retailPrice: "",
         wholesalePrice: "",
-        wholesaleThreshold: "",
         stock: "",
         category: "",
         barcode: "",
         brand: "",
         variant: "",
-        compatibility: "",
-        lowStockThreshold: "5",
-        buyingPrice: ""
+        compatibility: [""],
+        lowStockThreshold: "5"
       });
-    if (onAdd) onAdd();
-  } catch (error) {
-    console.error("Error adding product:", error);
-    setMessage(error.response?.data?.message || "Error adding product");
-  }
-};
+      setIsCollapsed(true); // Collapse form after successful submission
+      if (onAdd) onAdd();
+    } catch (error) {
+      console.error("Error adding product:", error);
+      console.log('Error response:', error.response?.data);
+      
+      // Handle specific MongoDB duplicate key error for barcode
+      if (error.response?.data?.includes && error.response.data.includes('E11000 duplicate key error') && error.response.data.includes('barcode')) {
+        if (error.response.data.includes('dup key: { barcode: null }')) {
+          setMessage("Database error: Multiple products with empty barcodes not allowed. Please provide a unique barcode or leave it empty for the first product only.");
+        } else {
+          setMessage("A product with this barcode already exists. Please use a unique barcode.");
+        }
+      } else {
+        setMessage(error.response?.data?.message || "Error adding product");
+      }
+    }
+  };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-      <h3 className="text-xl font-bold text-gray-800 mb-4">Add New Product</h3>
-      
+    <div className="bg-white rounded-lg shadow-lg mb-8 overflow-hidden">
+      {/* Collapsible Header */}
+      <div 
+        className="bg-gradient-to-r from-blue-600 to-blue-700 p-4 cursor-pointer hover:from-blue-700 hover:to-blue-800 transition-all"
+        onClick={() => setIsCollapsed(!isCollapsed)}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="bg-white bg-opacity-20 p-2 rounded-lg">
+              <span className="text-white text-xl">+</span>
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-white">Add New Product</h3>
+              <p className="text-blue-100 text-sm">Click to expand the product form</p>
+            </div>
+          </div>
+          <div className={`text-white text-2xl transform transition-transform ${isCollapsed ? '' : 'rotate-180'}`}>
+            ▼
+          </div>
+        </div>
+      </div>
+
+      {/* Message Display */}
       {message && (
-        <div className={`mb-4 p-3 rounded-md ${
-          message.includes('added') || message.includes('success')
+        <div className={`mx-6 mt-4 p-3 rounded-md ${
+          message.includes('successfully') || message.includes('added')
             ? 'bg-green-100 text-green-700 border border-green-300'
             : 'bg-red-100 text-red-700 border border-red-300'
         }`}>
-          {message}
+          <div className="flex items-center">
+            <span className="mr-2">
+              {message.includes('successfully') ? '[SUCCESS]' : '[ERROR]'}
+            </span>
+            {message}
+          </div>
         </div>
       )}
       
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {/* Basic Information */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Product Name *</label>
-          <input 
-            name="name" 
-            placeholder="Enter product name" 
-            value={form.name} 
-            onChange={handleChange} 
-            required 
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-          <input 
-            name="description" 
-            placeholder="Product description" 
-            value={form.description} 
-            onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Brand</label>
-          <input 
-            name="brand" 
-            placeholder="Brand name" 
-            value={form.brand} 
-            onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        
-        {/* Pricing */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Buying Price</label>
-          <input 
-            type="number" 
-            min="0" 
-            step="0.01" 
-            name="buyingPrice" 
-            placeholder="0.00" 
-            value={form.buyingPrice} 
-            onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Retail Price *</label>
-          <input 
-            type="number" 
-            min="0" 
-            step="0.01" 
-            name="retailPrice" 
-            placeholder="0.00" 
-            value={form.retailPrice} 
-            onChange={handleChange} 
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Wholesale Price *</label>
-          <input 
-            type="number" 
-            min="0" 
-            step="0.01" 
-            name="wholesalePrice" 
-            placeholder="0.00" 
-            value={form.wholesalePrice} 
-            onChange={handleChange} 
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        
-        {/* Stock Information */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Current Stock *</label>
-          <input 
-            type="number" 
-            min="0" 
-            name="stock" 
-            placeholder="0" 
-            value={form.stock} 
-            onChange={handleChange} 
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Wholesale Threshold *</label>
-          <input 
-            type="number" 
-            min="0" 
-            name="wholesaleThreshold" 
-            placeholder="Minimum qty for wholesale" 
-            value={form.wholesaleThreshold} 
-            onChange={handleChange} 
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Low Stock Alert</label>
-          <input 
-            type="number" 
-            min="0" 
-            name="lowStockThreshold" 
-            placeholder="Alert threshold" 
-            value={form.lowStockThreshold} 
-            onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        
-        {/* Car Accessory Specific */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Vehicle Variant</label>
-          <input 
-            name="variant" 
-            placeholder="e.g., Honda City, Toyota Corolla" 
-            value={form.variant} 
-            onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Compatibility</label>
-          <input 
-            name="compatibility" 
-            placeholder="e.g., Universal, Perfect Fit" 
-            value={form.compatibility} 
-            onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Barcode</label>
-          <input 
-            name="barcode" 
-            placeholder="Product barcode" 
-            value={form.barcode} 
-            onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-          <select
-            name="category" 
-            value={form.category} 
-            onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Select a category (optional)</option>
-            {categories.map(category => (
-              <option key={category._id} value={category._id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        
-        {/* Submit Button */}
-        <div className="md:col-span-2 lg:col-span-3">
-          <button 
-            type="submit" 
-            className="w-full md:w-auto px-6 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-colors"
-          >
-            Add Product
-          </button>
-        </div>
-      </form>
+      {/* Collapsible Form */}
+      <div className={`transition-all duration-300 ${isCollapsed ? 'max-h-0 opacity-0' : 'max-h-[2000px] opacity-100'} overflow-hidden`}>
+        <form onSubmit={handleSubmit} className="p-6">
+          {/* Basic Information Section */}
+          <div className="mb-8">
+            <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+              <span className="bg-blue-100 text-blue-600 p-2 rounded-lg mr-3 text-sm font-bold">INFO</span>
+              <span>Basic Information</span>
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Product Name *</label>
+                <input 
+                  name="name" 
+                  placeholder="Enter product name" 
+                  value={form.name} 
+                  onChange={handleChange} 
+                  required 
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Brand</label>
+                <input 
+                  name="brand" 
+                  placeholder="Brand name" 
+                  value={form.brand} 
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                <select
+                  name="category" 
+                  value={form.category} 
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                >
+                  <option value="">Select a category (optional)</option>
+                  {categories.map(category => (
+                    <option key={category._id} value={category._id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="md:col-span-2 lg:col-span-3">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <textarea 
+                  name="description" 
+                  placeholder="Product description" 
+                  value={form.description} 
+                  onChange={handleChange}
+                  required
+                  rows="3"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Pricing Section */}
+          <div className="mb-8">
+            <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+              <span className="bg-green-100 text-green-600 p-2 rounded-lg mr-3 text-sm font-bold">PRICE</span>
+              <span>Pricing Information</span>
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Retail Price *</label>
+                <input 
+                  type="number" 
+                  min="0" 
+                  step="0.01" 
+                  name="retailPrice" 
+                  placeholder="0.00" 
+                  value={form.retailPrice} 
+                  onChange={handleChange} 
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Wholesale Price *</label>
+                <input 
+                  type="number" 
+                  min="0" 
+                  step="0.01" 
+                  name="wholesalePrice" 
+                  placeholder="0.00" 
+                  value={form.wholesalePrice} 
+                  onChange={handleChange} 
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Stock Management Section */}
+          <div className="mb-8">
+            <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+              <span className="bg-orange-100 text-orange-600 p-2 rounded-lg mr-3 text-sm font-bold">STOCK</span>
+              <span>Stock Management</span>
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Current Stock *</label>
+                <input 
+                  type="number" 
+                  min="0" 
+                  name="stock" 
+                  placeholder="0" 
+                  value={form.stock} 
+                  onChange={handleChange} 
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Low Stock Alert</label>
+                <input 
+                  type="number" 
+                  min="0" 
+                  name="lowStockThreshold" 
+                  placeholder="Alert threshold" 
+                  value={form.lowStockThreshold} 
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Product Details Section */}
+          <div className="mb-8">
+            <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+              <span className="bg-purple-100 text-purple-600 p-2 rounded-lg mr-3 text-sm font-bold">DETAILS</span>
+              <span>Product Details</span>
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Variant</label>
+                <input 
+                  name="variant" 
+                  placeholder="e.g., Premium, Standard, Deluxe, Pro" 
+                  value={form.variant} 
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Barcode</label>
+                <input 
+                  name="barcode" 
+                  placeholder="Product barcode" 
+                  value={form.barcode} 
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                />
+              </div>
+            </div>
+
+            {/* Multiple Compatibility Inputs */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Compatible with</label>
+              <div className="space-y-3">
+                {form.compatibility.map((comp, index) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <input 
+                      placeholder="e.g., Honda City, Toyota Corolla, Universal Fit" 
+                      value={comp} 
+                      onChange={(e) => handleCompatibilityChange(index, e.target.value)}
+                      className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    />
+                    {form.compatibility.length > 1 && (
+                      <button 
+                        type="button"
+                        onClick={() => removeCompatibilityField(index)}
+                        className="p-3 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
+                        title="Remove compatibility"
+                      >
+                        Remove
+                      </button>
+                    )}
+                    {index === form.compatibility.length - 1 && (
+                      <button 
+                        type="button"
+                        onClick={addCompatibilityField}
+                        className="p-3 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition-colors"
+                        title="Add compatibility"
+                      >
+                        Add
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-gray-500 mt-2">Add multiple compatibility options (vehicles, models, applications) for better searchability</p>
+            </div>
+          </div>
+          
+          {/* Submit Button */}
+          <div className="flex items-center justify-between pt-6 border-t border-gray-200">
+            <button 
+              type="button"
+              onClick={() => setIsCollapsed(true)}
+              className="px-6 py-3 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              className="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all transform hover:scale-105"
+            >
+              Add Product
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

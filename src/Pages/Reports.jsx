@@ -1,148 +1,85 @@
 import { useState, useEffect } from 'react';
-import apiClient from '../api';
 import { 
   SalesTrendChart, 
   TopProductsChart, 
   InventoryStatusChart,
   CategoryChart,
-  StockValueChart 
+  StockValueChart,
+  ProfitMarginChart
 } from '../Components/Charts';
+import {
+  LoadingSpinner,
+  ErrorDisplay,
+  MessageDisplay,
+  DateRangeFilter,
+  useCSVExport,
+  useReportsAnalyticsData
+} from '../Components/ReportsAnalyticsCommon';
 
 export default function Reports() {
   const [activeTab, setActiveTab] = useState('overview');
-  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState('');
   const [dateRange, setDateRange] = useState({
     startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
     endDate: new Date().toISOString().split('T')[0]
   });
 
-  // State for different report data
-  const [dashboardMetrics, setDashboardMetrics] = useState(null);
-  const [salesReport, setSalesReport] = useState(null);
-  const [inventoryReport, setInventoryReport] = useState(null);
-  const [lowStockAlerts, setLowStockAlerts] = useState([]);
-  const [message, setMessage] = useState('');
+  // Use shared data fetching hook
+  const {
+    loading,
+    setLoading,
+    error,
+    setError,
+    dashboardMetrics,
+    salesReport,
+    inventoryReport,
+    lowStockAlerts,
+    fetchDashboardMetrics,
+    fetchSalesReport,
+    fetchInventoryReport,
+    fetchLowStockAlerts
+  } = useReportsAnalyticsData();
 
-  // Fetch dashboard metrics
-  const fetchDashboardMetrics = async () => {
-    try {
-      const response = await apiClient.get('/reports/dashboard-metrics', {
-        params: dateRange
-      });
-      setDashboardMetrics(response.data.data);
-    } catch (error) {
-      console.error('Error fetching dashboard metrics:', error);
-      setMessage('Failed to load dashboard metrics');
-    }
-  };
+  // Use shared CSV export hook
+  const { exportSalesData, exportInventoryData } = useCSVExport();
 
-  // Fetch sales report
-  const fetchSalesReport = async (page = 1) => {
-    try {
-      const response = await apiClient.get('/reports/sales', {
-        params: { ...dateRange, page, limit: 10 }
-      });
-      setSalesReport(response.data.data);
-    } catch (error) {
-      console.error('Error fetching sales report:', error);
-      setMessage('Failed to load sales report');
-    }
-  };
-
-  // Fetch inventory report
-  const fetchInventoryReport = async (page = 1, lowStock = false) => {
-    try {
-      const response = await apiClient.get('/reports/inventory', {
-        params: { page, limit: 10, lowStock }
-      });
-      setInventoryReport(response.data.data);
-    } catch (error) {
-      console.error('Error fetching inventory report:', error);
-      setMessage('Failed to load inventory report');
-    }
-  };
-
-  // Fetch low stock alerts
-  const fetchLowStockAlerts = async () => {
-    try {
-      const response = await apiClient.get('/reports/low-stock-alerts');
-      setLowStockAlerts(response.data.data);
-    } catch (error) {
-      console.error('Error fetching low stock alerts:', error);
-    }
-  };
-
-  // CSV Export functions
-  const exportToCSV = (data, filename) => {
-    if (!data || data.length === 0) {
-      setMessage('No data to export');
-      return;
-    }
-
-    const headers = Object.keys(data[0]);
-    const csvContent = [
-      headers.join(','), // Header row
-      ...data.map(row => 
-        headers.map(header => {
-          const value = row[header];
-          // Handle values that might contain commas
-          return typeof value === 'string' && value.includes(',') 
-            ? `"${value}"` 
-            : value;
-        }).join(',')
-      )
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `${filename}-${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const exportSalesData = async () => {
-    try {
-      setMessage('Exporting sales data...');
-      const response = await apiClient.get('/reports/export/sales', {
-        params: dateRange
-      });
-      exportToCSV(response.data.data, 'sales-report');
-      setMessage('Sales data exported successfully!');
+  // Enhanced export functions using shared hook
+  const handleExportSales = async () => {
+    setMessage('Exporting sales data...');
+    const result = await exportSalesData(dateRange);
+    setMessage(result.message);
+    if (result.success) {
       setTimeout(() => setMessage(''), 3000);
-    } catch (error) {
-      console.error('Error exporting sales data:', error);
-      setMessage('Failed to export sales data');
     }
   };
 
-  const exportInventoryData = async () => {
-    try {
-      setMessage('Exporting inventory data...');
-      const response = await apiClient.get('/reports/export/inventory');
-      exportToCSV(response.data.data, 'inventory-report');
-      setMessage('Inventory data exported successfully!');
+  const handleExportInventory = async () => {
+    setMessage('Exporting inventory data...');
+    const result = await exportInventoryData();
+    setMessage(result.message);
+    if (result.success) {
       setTimeout(() => setMessage(''), 3000);
-    } catch (error) {
-      console.error('Error exporting inventory data:', error);
-      setMessage('Failed to export inventory data');
     }
   };
 
-  // Initial data fetch
+  // Initial data fetch with proper error handling
   useEffect(() => {
     const fetchInitialData = async () => {
       setLoading(true);
-      await Promise.all([
-        fetchDashboardMetrics(),
-        fetchSalesReport(),
-        fetchInventoryReport(),
-        fetchLowStockAlerts()
-      ]);
-      setLoading(false);
+      setError(null);
+      
+      try {
+        await Promise.allSettled([
+          fetchDashboardMetrics(dateRange),
+          fetchSalesReport(dateRange),
+          fetchInventoryReport(),
+          fetchLowStockAlerts()
+        ]);
+      } catch (err) {
+        setError(err.message || 'Failed to load reports data');
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchInitialData();
@@ -157,90 +94,66 @@ export default function Reports() {
   };
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-lg">Loading reports...</div>
-      </div>
-    );
+    return <LoadingSpinner title="Loading Reports..." subtitle="Generating comprehensive business reports" />;
+  }
+
+  if (error) {
+    return <ErrorDisplay error={error} onRetry={() => window.location.reload()} />;
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">Business Reports & Analytics</h1>
+    <div className="min-h-screen bg-slate-50">
+      <div className="max-w-7xl mx-auto p-6 space-y-8">
+        {/* Header */}
+        <div className="bg-white rounded-lg p-6 shadow-sm border">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900 mb-2">
+                Business Reports
+              </h1>
+              <p className="text-slate-600">Comprehensive data insights and export capabilities</p>
+            </div>
+          </div>
         
         {/* Date Range Filter */}
-        <div className="bg-white p-4 rounded-lg shadow-md mb-6">
-          <div className="flex items-center gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-              <input
-                type="date"
-                value={dateRange.startDate}
-                onChange={(e) => handleDateRangeChange('startDate', e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-              <input
-                type="date"
-                value={dateRange.endDate}
-                onChange={(e) => handleDateRangeChange('endDate', e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div className="flex gap-2 mt-6">
-              <button
-                onClick={exportSalesData}
-                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
-              >
-                Export Sales CSV
-              </button>
-              <button
-                onClick={exportInventoryData}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-              >
-                Export Inventory CSV
-              </button>
-            </div>
-          </div>
+        <DateRangeFilter 
+          dateRange={dateRange} 
+          onChange={handleDateRangeChange} 
+          onExportSales={handleExportSales}
+          onExportInventory={handleExportInventory}
+        />
         </div>
 
-        {message && (
-          <div className={`mb-4 p-3 rounded-md ${
-            message.includes('successfully') || message.includes('Exporting')
-              ? 'bg-green-100 text-green-700 border border-green-300'
-              : 'bg-red-100 text-red-700 border border-red-300'
-          }`}>
-            {message}
-          </div>
-        )}
+        {/* Message Display */}
+        <MessageDisplay message={message} onClose={() => setMessage('')} />
 
         {/* Tab Navigation */}
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8">
-            {[
-              { id: 'overview', label: 'Overview' },
-              { id: 'sales', label: 'Sales Report' },
-              { id: 'inventory', label: 'Inventory Report' },
-              { id: 'alerts', label: 'Stock Alerts' }
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </nav>
-        </div>
-      </div>
+        <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+          <div className="border-b border-slate-200">
+            <nav className="flex">
+              {[
+                { id: 'overview', label: 'Overview' },
+                { id: 'sales', label: 'Sales Report' },
+                { id: 'inventory', label: 'Inventory Report' },
+                { id: 'alerts', label: 'Stock Alerts' }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex-1 px-6 py-4 font-medium text-sm transition-all duration-300 ${
+                    activeTab === tab.id
+                      ? 'bg-blue-600 text-white'
+                      : 'text-slate-600 hover:text-slate-800 hover:bg-slate-50'
+                  }`}
+                >
+                  <span>{tab.label}</span>
+                </button>
+              ))}
+            </nav>
+          </div>
+
+          {/* Tab Content Container */}
+          <div className="p-8">
 
       {/* Tab Content */}
       {activeTab === 'overview' && (
@@ -475,7 +388,9 @@ export default function Reports() {
           <div className="p-6">
             {lowStockAlerts.length === 0 ? (
               <div className="text-center py-8">
-                <div className="text-green-500 text-4xl mb-4">✓</div>
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="text-green-600 text-2xl font-bold">OK</div>
+                </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">All Good!</h3>
                 <p className="text-gray-500">No stock alerts at this time.</p>
               </div>
@@ -521,7 +436,10 @@ export default function Reports() {
             )}
           </div>
         </div>
-      )}
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

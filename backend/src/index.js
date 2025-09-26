@@ -1,15 +1,26 @@
 import dotenv from "dotenv"
+import { createServer } from 'http'
 import connectDB from "./db/index.js"
 import app from './app.js'
+import WebSocketService from './services/websocket.service.js'
 
 dotenv.config({
     path: './.env'
 })
 
+// Create HTTP server
+const server = createServer(app);
+
+// Initialize WebSocket service
+WebSocketService.initialize(server);
+
 connectDB()
 .then(() => {
-        app.listen(process.env.PORT || 4200, () => {
-            console.log(`Server is running on port ${process.env.PORT}`)
+        const PORT = process.env.PORT || 4200;
+        server.listen(PORT, () => {
+            console.log(`✅ Server is running on port ${PORT}`);
+            console.log(`🚀 WebSocket service initialized`);
+            console.log(`📊 Analytics API available at http://localhost:${PORT}/api/analytics`);
         })
     })
 

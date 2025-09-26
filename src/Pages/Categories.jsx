@@ -12,6 +12,7 @@ export default function Categories() {
   const [newCategory, setNewCategory] = useState('');
   const [editingCategory, setEditingCategory] = useState(null);
   const [editName, setEditName] = useState('');
+  const [isFormCollapsed, setIsFormCollapsed] = useState(true);
 
   // Fetch categories
   const fetchCategories = async () => {
@@ -43,6 +44,7 @@ export default function Categories() {
       const response = await apiClient.post('/categories', { name: newCategory.trim() });
       setCategories(prev => [response.data.data, ...prev]);
       setNewCategory('');
+      setIsFormCollapsed(true); // Collapse form after successful submission
       setMessage('Category created successfully!');
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
@@ -125,38 +127,78 @@ export default function Categories() {
       </div>
 
       {/* Add New Category Form */}
-      <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">Add New Category</h2>
+      <div className="bg-white rounded-lg shadow-lg mb-8 overflow-hidden">
+        {/* Collapsible Header */}
+        <div 
+          className="bg-gradient-to-r from-green-600 to-green-700 p-4 cursor-pointer hover:from-green-700 hover:to-green-800 transition-all"
+          onClick={() => setIsFormCollapsed(!isFormCollapsed)}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="bg-white bg-opacity-20 p-2 rounded-lg">
+                <span className="text-white text-xl">+</span>
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-white">Add New Category</h2>
+                <p className="text-green-100 text-sm">Click to expand the category form</p>
+              </div>
+            </div>
+            <div className={`text-white text-2xl transform transition-transform ${isFormCollapsed ? '' : 'rotate-180'}`}>
+              ▼
+            </div>
+          </div>
+        </div>
         
+        {/* Message Display */}
         {message && (
-          <div className={`mb-4 p-3 rounded-md ${
+          <div className={`mx-6 mt-4 p-3 rounded-md ${
             message.includes('successfully') 
               ? 'bg-green-100 text-green-700 border border-green-300'
               : 'bg-red-100 text-red-700 border border-red-300'
           }`}>
-            {message}
+            <div className="flex items-center">
+              <span className="mr-2">
+                {message.includes('successfully') ? '[SUCCESS]' : '[ERROR]'}
+              </span>
+              {message}
+            </div>
           </div>
         )}
-
-        <form onSubmit={handleCreate} className="flex gap-4">
-          <div className="flex-1">
-            <input
-              type="text"
-              value={newCategory}
-              onChange={(e) => setNewCategory(e.target.value)}
-              placeholder="Enter category name"
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={isSubmitting || !newCategory.trim()}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-          >
-            {isSubmitting ? 'Adding...' : 'Add Category'}
-          </button>
-        </form>
+        
+        {/* Collapsible Form */}
+        <div className={`transition-all duration-300 ${isFormCollapsed ? 'max-h-0 opacity-0' : 'max-h-96 opacity-100'} overflow-hidden`}>
+          <form onSubmit={handleCreate} className="p-6">
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Category Name *</label>
+                <input
+                  type="text"
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                  placeholder="Enter category name"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                  required
+                />
+              </div>
+            </div>
+            <div className="flex items-center justify-between pt-6 border-t border-gray-200 mt-6">
+              <button 
+                type="button"
+                onClick={() => setIsFormCollapsed(true)}
+                className="px-6 py-3 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting || !newCategory.trim()}
+                className="px-8 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-medium rounded-lg hover:from-green-700 hover:to-green-800 transition-all transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? 'Adding...' : 'Add Category'}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
 
       {/* Categories List */}
@@ -174,7 +216,7 @@ export default function Categories() {
 
         {categories.length === 0 ? (
           <div className="p-12 text-center">
-            <div className="text-gray-400 text-6xl mb-4">📁</div>
+            <div className="text-gray-400 text-4xl mb-4 font-bold">NO CATEGORIES</div>
             <p className="text-gray-500 text-lg">No categories found</p>
             <p className="text-gray-400 text-sm">Add your first category using the form above</p>
           </div>

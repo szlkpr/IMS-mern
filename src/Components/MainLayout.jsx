@@ -3,12 +3,12 @@ import Navbar from './Navbar';
 
 const MainLayout = ({ onLogout }) => {
   return (
-    <>
+    <div className="min-h-screen">
       <Navbar onLogout={onLogout} />
-      <div className="container" style={{ padding: '20px' }}>
+      <main className="relative">
         <Outlet />
-      </div>
-    </>
+      </main>
+    </div>
   );
 };
 

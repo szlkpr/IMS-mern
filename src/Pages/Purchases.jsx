@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import apiClient from '../api';
 import axios from 'axios';
 
-const PurchasesPage = () => {
+const PurchasesPage = ({ showAddForm = false }) => {
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState('');
   const [vendorContact, setVendorContact] = useState('');
@@ -13,6 +13,7 @@ const PurchasesPage = () => {
   const [purchases, setPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [forceShowAddForm, setForceShowAddForm] = useState(showAddForm);
 
   // When a product is selected, update the price field with its wholesale price
   useEffect(() => {
@@ -113,12 +114,25 @@ const PurchasesPage = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-6">
-      {/* Add Purchase Form */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Add New Purchase Order</h2>
-          <p className="text-gray-600">Record new inventory purchases and restock products</p>
-        </div>
+      {/* Add Purchase Form (conditional) */}
+      {(forceShowAddForm || showAddForm) && (
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+          <div className="mb-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">Add New Purchase Order</h2>
+                <p className="text-gray-600">Record new inventory purchases and restock products</p>
+              </div>
+              {!showAddForm && (
+                <button
+                  onClick={() => setForceShowAddForm(false)}
+                  className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
+          </div>
         
         {message && (
           <div className={`mb-4 p-3 rounded-md ${
@@ -236,7 +250,21 @@ const PurchasesPage = () => {
             </button>
           </div>
         </form>
-      </div>
+        </div>
+      )}
+      
+      {/* Add New Purchase Button (when form is hidden) */}
+      {!forceShowAddForm && !showAddForm && (
+        <div className="mb-6">
+          <button
+            onClick={() => setForceShowAddForm(true)}
+            className="px-6 py-3 bg-gradient-to-r from-orange-600 to-orange-700 text-white font-medium rounded-lg hover:from-orange-700 hover:to-orange-800 transition-all transform hover:scale-105 shadow-lg"
+          >
+            <span className="mr-2">+</span>
+            Add New Purchase
+          </button>
+        </div>
+      )}
 
       {/* Purchases History */}
       <div className="bg-white rounded-lg shadow-md">

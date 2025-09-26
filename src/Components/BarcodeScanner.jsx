@@ -170,7 +170,7 @@ export default function BarcodeScanner({ isOpen, onClose, onDetected }) {
                 onClick={simulateBarcodeDetection}
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
               >
-                🎯 Simulate Detection (Demo)
+Simulate Detection (Demo)
               </button>
             </div>
           </div>
@@ -220,7 +220,7 @@ export default function BarcodeScanner({ isOpen, onClose, onDetected }) {
         <div className="mt-6 pt-4 border-t border-gray-200">
           <div className="flex justify-between items-center">
             <div className="text-xs text-gray-500">
-              {isScanning ? '🔴 Camera Active' : '📷 Camera Inactive'}
+              {isScanning ? 'Camera Active' : 'Camera Inactive'}
             </div>
             <button
               onClick={handleClose}

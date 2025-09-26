@@ -3,7 +3,7 @@ import apiClient from '../api';
 import axios from 'axios';
 import BarcodeScanner from '../Components/BarcodeScanner';
 
-const SalesPage = () => {
+const SalesPage = ({ showAddForm = false }) => {
   // State for products, sales, and form inputs
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState('');
@@ -15,6 +15,7 @@ const SalesPage = () => {
   const [loading, setLoading] = useState(true);
   const [showScanner, setShowScanner] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [forceShowAddForm, setForceShowAddForm] = useState(showAddForm);
 
   // When a product is selected, update the price field with its retail price
   useEffect(() => {
@@ -178,17 +179,29 @@ const SalesPage = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-6">
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">Record a New Sale</h2>
-          <button
-            type="button"
-            onClick={() => setShowScanner(true)}
-            className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors flex items-center gap-2"
-          >
-            📷 Scan Barcode
-          </button>
-        </div>
+      {/* Add Sale Form (conditional) */}
+      {(forceShowAddForm || showAddForm) && (
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-800">Record a New Sale</h2>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setShowScanner(true)}
+                className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors flex items-center gap-2"
+              >
+                📷 Scan Barcode
+              </button>
+              {!showAddForm && (
+                <button
+                  onClick={() => setForceShowAddForm(false)}
+                  className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
+          </div>
 
         {message && (
           <div className={`mb-4 p-3 rounded-md ${
@@ -285,7 +298,21 @@ const SalesPage = () => {
             </button>
           </div>
         </form>
-      </div>
+        </div>
+      )}
+      
+      {/* Add New Sale Button (when form is hidden) */}
+      {!forceShowAddForm && !showAddForm && (
+        <div className="mb-6">
+          <button
+            onClick={() => setForceShowAddForm(true)}
+            className="px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-medium rounded-lg hover:from-green-700 hover:to-green-800 transition-all transform hover:scale-105 shadow-lg"
+          >
+            <span className="mr-2">+</span>
+            Record New Sale
+          </button>
+        </div>
+      )}
 
       {/* Sales History */}
       <div className="mt-8 bg-white rounded-lg shadow-md">

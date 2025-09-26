@@ -1,5 +1,6 @@
 //Sales Record
 import mongoose from "mongoose";
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 const soldProductsSchema = new mongoose.Schema({
     productId: {
@@ -33,5 +34,7 @@ const saleSchema = new mongoose.Schema({
         type: String,
     },
 }, { timestamps: true });
+
+saleSchema.plugin(mongooseAggregatePaginate);
 
 export const Sale = mongoose.model("Sale", saleSchema);
