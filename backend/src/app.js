@@ -9,6 +9,7 @@ import analyticsRoutes from "./routes/analytics.routes.js";
 import cookieParser from "cookie-parser"
 import express from "express"
 import cors from "cors"
+import { errorHandler } from "./middlewares/error.middleware.js"
 
 const app = express()
 
@@ -30,5 +31,8 @@ app.use("/api/v1/sales", saleRoutes)
 app.use("/api/v1/purchases", purchaseRoutes)
 app.use("/api/v1/reports", reportsRoutes)
 app.use("/api/v1/analytics", analyticsRoutes)
+
+// Global error handler middleware - must be last
+app.use(errorHandler)
 
 export default app

@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const Navbar = ({ onLogout }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -14,14 +17,14 @@ const Navbar = ({ onLogout }) => {
   const isActive = (path) => location.pathname === path;
 
   const navigationItems = [
-    { path: '/', label: 'Dashboard' },
-    { path: '/inventory', label: 'Inventory' },
-    { path: '/purchases', label: 'Purchases' },
-    { path: '/sales', label: 'Sales' },
-    { path: '/categories', label: 'Categories' },
-    { path: '/reports', label: 'Reports' },
-    { path: '/analytics', label: 'Analytics' },
-    { path: '/profile', label: 'Profile' }
+    { path: '/', label: t('navigation.dashboard') },
+    { path: '/inventory', label: t('navigation.inventory') },
+    { path: '/purchases', label: t('navigation.purchases') },
+    { path: '/sales', label: t('navigation.sales') },
+    { path: '/categories', label: t('navigation.categories') },
+    { path: '/reports', label: t('navigation.reports') },
+    { path: '/analytics', label: t('navigation.analytics') },
+    { path: '/profile', label: t('navigation.profile') }
   ];
 
   return (
@@ -36,9 +39,9 @@ const Navbar = ({ onLogout }) => {
               </div>
                 <div className="ml-3">
                 <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-                  Inventory
+                  {t('app.title').split(' ')[0]}
                 </h1>
-                <p className="text-xs text-slate-400">Management System</p>
+                <p className="text-xs text-slate-400">{t('app.title').split(' ')[1]}</p>
               </div>
             </div>
           </div>
@@ -64,12 +67,15 @@ const Navbar = ({ onLogout }) => {
 
           {/* User Menu and Mobile Button */}
           <div className="flex items-center space-x-4">
+            {/* Language Switcher */}
+            <LanguageSwitcher />
+            
             {/* Logout Button */}
             <button
               onClick={handleLogout}
               className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors"
             >
-              Logout
+              {t('navigation.logout')}
             </button>
 
             {/* Mobile menu button */}

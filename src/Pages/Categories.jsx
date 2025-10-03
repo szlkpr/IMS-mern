@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import apiClient from '../api';
 
 export default function Categories() {
+  const { t } = useTranslation();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -22,7 +24,7 @@ export default function Categories() {
       setCategories(response.data.data.docs || []);
     } catch (error) {
       console.error('Error fetching categories:', error);
-      setError('Failed to load categories');
+      setError(t('categories.failedToLoadCategories'));
     } finally {
       setLoading(false);
     }
@@ -45,11 +47,11 @@ export default function Categories() {
       setCategories(prev => [response.data.data, ...prev]);
       setNewCategory('');
       setIsFormCollapsed(true); // Collapse form after successful submission
-      setMessage('Category created successfully!');
+      setMessage(t('categories.categoryCreatedSuccessfully'));
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
       console.error('Error creating category:', error);
-      setMessage(error.response?.data?.message || 'Failed to create category');
+      setMessage(error.response?.data?.message || t('categories.failedToCreateCategory'));
     } finally {
       setIsSubmitting(false);
     }
@@ -69,11 +71,11 @@ export default function Categories() {
       ));
       setEditingCategory(null);
       setEditName('');
-      setMessage('Category updated successfully!');
+      setMessage(t('categories.categoryUpdatedSuccessfully'));
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
       console.error('Error updating category:', error);
-      setMessage(error.response?.data?.message || 'Failed to update category');
+      setMessage(error.response?.data?.message || t('categories.failedToUpdateCategory'));
     } finally {
       setIsSubmitting(false);
     }
@@ -81,7 +83,7 @@ export default function Categories() {
 
   // Delete category
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this category?')) return;
+    if (!window.confirm(t('categories.confirmDeleteCategory'))) return;
     
     setIsSubmitting(true);
     setMessage('');
@@ -89,11 +91,11 @@ export default function Categories() {
     try {
       await apiClient.delete(`/categories/${id}`);
       setCategories(prev => prev.filter(cat => cat._id !== id));
-      setMessage('Category deleted successfully!');
+      setMessage(t('categories.categoryDeletedSuccessfully'));
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
       console.error('Error deleting category:', error);
-      setMessage(error.response?.data?.message || 'Failed to delete category');
+      setMessage(error.response?.data?.message || t('categories.failedToDeleteCategory'));
     } finally {
       setIsSubmitting(false);
     }
@@ -114,7 +116,7 @@ export default function Categories() {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="text-lg">Loading categories...</div>
+        <div className="text-lg">{t('categories.loadingCategories')}</div>
       </div>
     );
   }
@@ -122,8 +124,8 @@ export default function Categories() {
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Category Management</h1>
-        <p className="text-gray-600">Organize your products with categories</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('categories.title')}</h1>
+        <p className="text-gray-600">{t('categories.manageCategories')}</p>
       </div>
 
       {/* Add New Category Form */}
@@ -139,8 +141,8 @@ export default function Categories() {
                 <span className="text-white text-xl">+</span>
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white">Add New Category</h2>
-                <p className="text-green-100 text-sm">Click to expand the category form</p>
+                <h2 className="text-xl font-bold text-white">{t('categories.addNewCategory')}</h2>
+                <p className="text-green-100 text-sm">{t('categories.clickToExpand')}</p>
               </div>
             </div>
             <div className={`text-white text-2xl transform transition-transform ${isFormCollapsed ? '' : 'rotate-180'}`}>
@@ -158,7 +160,7 @@ export default function Categories() {
           }`}>
             <div className="flex items-center">
               <span className="mr-2">
-                {message.includes('successfully') ? '[SUCCESS]' : '[ERROR]'}
+                {message.includes('successfully') ? t('common.success') : t('common.error')}
               </span>
               {message}
             </div>
@@ -170,12 +172,12 @@ export default function Categories() {
           <form onSubmit={handleCreate} className="p-6">
             <div className="flex gap-4">
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Category Name *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('categories.categoryName')} *</label>
                 <input
                   type="text"
                   value={newCategory}
                   onChange={(e) => setNewCategory(e.target.value)}
-                  placeholder="Enter category name"
+                  placeholder={t('categories.enterCategoryName')}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                   required
                 />
@@ -187,14 +189,14 @@ export default function Categories() {
                 onClick={() => setIsFormCollapsed(true)}
                 className="px-6 py-3 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors"
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting || !newCategory.trim()}
                 className="px-8 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-medium rounded-lg hover:from-green-700 hover:to-green-800 transition-all transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
-                {isSubmitting ? 'Adding...' : 'Add Category'}
+                {isSubmitting ? t('categories.adding') : t('categories.addCategory')}
               </button>
             </div>
           </form>
@@ -204,8 +206,8 @@ export default function Categories() {
       {/* Categories List */}
       <div className="bg-white rounded-lg shadow-md">
         <div className="p-6 border-b">
-          <h2 className="text-xl font-semibold text-gray-800">All Categories</h2>
-          <p className="text-sm text-gray-600 mt-1">{categories.length} categories total</p>
+          <h2 className="text-xl font-semibold text-gray-800">{t('categories.allCategories')}</h2>
+          <p className="text-sm text-gray-600 mt-1">{t('categories.categoriesTotal', { count: categories.length })}</p>
         </div>
 
         {error && (
@@ -216,9 +218,9 @@ export default function Categories() {
 
         {categories.length === 0 ? (
           <div className="p-12 text-center">
-            <div className="text-gray-400 text-4xl mb-4 font-bold">NO CATEGORIES</div>
-            <p className="text-gray-500 text-lg">No categories found</p>
-            <p className="text-gray-400 text-sm">Add your first category using the form above</p>
+            <div className="text-gray-400 text-4xl mb-4 font-bold">{t('categories.noCategories')}</div>
+            <p className="text-gray-500 text-lg">{t('categories.noCategoriesFound')}</p>
+            <p className="text-gray-400 text-sm">{t('categories.createFirstCategory')}</p>
           </div>
         ) : (
           <div className="divide-y divide-gray-200">
@@ -239,23 +241,23 @@ export default function Categories() {
                         disabled={isSubmitting || !editName.trim()}
                         className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 transition-colors"
                       >
-                        Save
+                        {t('common.save')}
                       </button>
                       <button
                         onClick={cancelEdit}
                         className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors"
                       >
-                        Cancel
+                        {t('common.cancel')}
                       </button>
                     </div>
                   ) : (
                     <div>
                       <h3 className="text-lg font-medium text-gray-900">{category.name}</h3>
                       <p className="text-sm text-gray-500">
-                        Created: {new Date(category.createdAt).toLocaleDateString()}
+                        {t('categories.created')}: {new Date(category.createdAt).toLocaleDateString()}
                       </p>
                       {category.slug && (
-                        <p className="text-xs text-gray-400">Slug: {category.slug}</p>
+                        <p className="text-xs text-gray-400">{t('categories.slug')}: {category.slug}</p>
                       )}
                     </div>
                   )}
@@ -267,14 +269,14 @@ export default function Categories() {
                       onClick={() => startEdit(category)}
                       className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                     >
-                      Edit
+                      {t('common.edit')}
                     </button>
                     <button
                       onClick={() => handleDelete(category._id)}
                       disabled={isSubmitting}
                       className="px-3 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700 disabled:bg-gray-400 transition-colors"
                     >
-                      Delete
+                      {t('common.delete')}
                     </button>
                   </div>
                 )}

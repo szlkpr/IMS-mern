@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
+import './i18n';
 import LoginPage from './Pages/LoginPage';
 import DashboardPage from './Pages/Dashboard';
 import InventoryPage from './Pages/ProductsPage';
-import SalesPage from './Pages/Sales';
+import SalesPage from './Pages/EnhancedSales';
 import PurchasesPage from './Pages/Purchases';
 import ProfilePage from './Pages/Profile';
 import ReportsPage from './Pages/Reports';

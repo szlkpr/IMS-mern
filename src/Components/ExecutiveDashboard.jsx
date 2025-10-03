@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
 import { Alert, AlertDescription } from './ui/Alert';
 import { Badge } from './ui/Badge';
@@ -24,6 +25,7 @@ import { useDashboardWebSocket } from '../services/websocketService';
 import axios from 'axios';
 
 const ExecutiveDashboard = () => {
+  const { t } = useTranslation();
   const [executiveSummary, setExecutiveSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -96,10 +98,10 @@ const ExecutiveDashboard = () => {
 
   // Health score color and label
   const getHealthScoreColor = (score) => {
-    if (score >= 80) return { color: 'text-green-600', bg: 'bg-green-100', label: 'Excellent' };
-    if (score >= 60) return { color: 'text-yellow-600', bg: 'bg-yellow-100', label: 'Good' };
-    if (score >= 40) return { color: 'text-orange-600', bg: 'bg-orange-100', label: 'Fair' };
-    return { color: 'text-red-600', bg: 'bg-red-100', label: 'Poor' };
+    if (score >= 80) return { color: 'text-green-600', bg: 'bg-green-100', label: t('executiveDashboard.healthScore.excellent') };
+    if (score >= 60) return { color: 'text-yellow-600', bg: 'bg-yellow-100', label: t('executiveDashboard.healthScore.good') };
+    if (score >= 40) return { color: 'text-orange-600', bg: 'bg-orange-100', label: t('executiveDashboard.healthScore.fair') };
+    return { color: 'text-red-600', bg: 'bg-red-100', label: t('executiveDashboard.healthScore.poor') };
   };
 
   // Format currency
@@ -119,10 +121,10 @@ const ExecutiveDashboard = () => {
     return (
       <div className="p-6 space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-gray-900">Executive Dashboard</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{t('executiveDashboard.title')}</h1>
           <div className="flex items-center space-x-2 text-sm text-gray-500">
             <Activity className="w-4 h-4 animate-pulse" />
-            <span>Loading analytics...</span>
+            <span>{t('executiveDashboard.loadingAnalytics')}</span>
           </div>
         </div>
         
@@ -146,12 +148,12 @@ const ExecutiveDashboard = () => {
         <Alert className="border-red-200 bg-red-50">
           <AlertTriangle className="h-4 w-4 text-red-600" />
           <AlertDescription className="text-red-800">
-            Failed to load executive dashboard: {error}
+            {t('executiveDashboard.failedToLoad')}: {error}
           </AlertDescription>
         </Alert>
         <Button onClick={handleRefresh} className="mt-4">
           <Refresh className="w-4 h-4 mr-2" />
-          Retry
+          {t('common.retry')}
         </Button>
       </div>
     );
@@ -164,8 +166,8 @@ const ExecutiveDashboard = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Executive Dashboard</h1>
-          <p className="text-gray-600 mt-1">Comprehensive business intelligence and real-time analytics</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t('executiveDashboard.title')}</h1>
+          <p className="text-gray-600 mt-1">{t('executiveDashboard.subtitle')}</p>
         </div>
         
         <div className="flex items-center space-x-4">
@@ -173,7 +175,7 @@ const ExecutiveDashboard = () => {
           <div className="flex items-center space-x-2">
             <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`}></div>
             <span className="text-sm text-gray-600">
-              {isConnected ? 'Live' : 'Offline'}
+              {isConnected ? t('executiveDashboard.live') : t('executiveDashboard.offline')}
             </span>
           </div>
 
@@ -183,15 +185,15 @@ const ExecutiveDashboard = () => {
             onChange={(e) => setDateRange(e.target.value)}
             className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="week">Last 7 Days</option>
-            <option value="month">This Month</option>
-            <option value="quarter">This Quarter</option>
-            <option value="year">This Year</option>
+            <option value="week">{t('executiveDashboard.dateRange.last7Days')}</option>
+            <option value="month">{t('executiveDashboard.dateRange.thisMonth')}</option>
+            <option value="quarter">{t('executiveDashboard.dateRange.thisQuarter')}</option>
+            <option value="year">{t('executiveDashboard.dateRange.thisYear')}</option>
           </select>
 
           <Button onClick={handleRefresh} disabled={refreshing} variant="outline">
             <Refresh className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            Refresh
+            {t('executiveDashboard.buttons.refresh')}
           </Button>
         </div>
       </div>
@@ -200,9 +202,9 @@ const ExecutiveDashboard = () => {
       {realTimeAlerts.length > 0 && (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold">Live Alerts</h3>
+            <h3 className="text-lg font-semibold">{t('executiveDashboard.liveAlerts')}</h3>
             <Button onClick={clearAllAlerts} variant="ghost" size="sm">
-              Clear All
+              {t('executiveDashboard.buttons.clearAll')}
             </Button>
           </div>
           
@@ -246,8 +248,8 @@ const ExecutiveDashboard = () => {
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Business Health Score</h3>
-              <p className="text-sm text-gray-600">Overall business performance indicator</p>
+              <h3 className="text-lg font-semibold text-gray-900">{t('executiveDashboard.businessHealthScore')}</h3>
+              <p className="text-sm text-gray-600">{t('executiveDashboard.healthScoreDescription')}</p>
             </div>
             <div className="text-right">
               <div className={`text-4xl font-bold ${healthScore.color}`}>
@@ -268,7 +270,7 @@ const ExecutiveDashboard = () => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-blue-600">Total Revenue</p>
+                <p className="text-sm font-medium text-blue-600">{t('executiveDashboard.kpis.totalRevenue')}</p>
                 <p className="text-2xl font-bold text-blue-900">
                   {formatCurrency(executiveSummary?.kpis.totalRevenue || 0)}
                 </p>
@@ -295,7 +297,7 @@ const ExecutiveDashboard = () => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-green-600">Total Sales</p>
+                <p className="text-sm font-medium text-green-600">{t('executiveDashboard.kpis.totalSales')}</p>
                 <p className="text-2xl font-bold text-green-900">
                   {executiveSummary?.kpis.totalSales?.toLocaleString() || 0}
                 </p>
@@ -322,11 +324,11 @@ const ExecutiveDashboard = () => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-purple-600">Avg Order Value</p>
+                <p className="text-sm font-medium text-purple-600">{t('executiveDashboard.kpis.avgOrderValue')}</p>
                 <p className="text-2xl font-bold text-purple-900">
                   {formatCurrency(executiveSummary?.kpis.averageOrderValue || 0)}
                 </p>
-                <p className="text-sm text-purple-600 mt-1">Per transaction</p>
+                <p className="text-sm text-purple-600 mt-1">{t('executiveDashboard.kpis.perTransaction')}</p>
               </div>
               <Target className="w-8 h-8 text-purple-600" />
             </div>
@@ -338,11 +340,11 @@ const ExecutiveDashboard = () => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-yellow-600">Profit Margin</p>
+                <p className="text-sm font-medium text-yellow-600">{t('executiveDashboard.kpis.profitMargin')}</p>
                 <p className="text-2xl font-bold text-yellow-900">
                   {formatPercentage(executiveSummary?.kpis.grossProfitMargin || 0)}
                 </p>
-                <p className="text-sm text-yellow-600 mt-1">Gross margin</p>
+                <p className="text-sm text-yellow-600 mt-1">{t('executiveDashboard.kpis.grossMargin')}</p>
               </div>
               <BarChart3 className="w-8 h-8 text-yellow-600" />
             </div>
@@ -354,12 +356,12 @@ const ExecutiveDashboard = () => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Customers</p>
+                <p className="text-sm font-medium text-gray-600">{t('executiveDashboard.kpis.totalCustomers')}</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {executiveSummary?.kpis.totalCustomers?.toLocaleString() || 0}
                 </p>
                 <p className="text-sm text-gray-600 mt-1">
-                  {formatPercentage(executiveSummary?.kpis.repeatCustomerRate || 0)} repeat rate
+                  {formatPercentage(executiveSummary?.kpis.repeatCustomerRate || 0)} {t('executiveDashboard.kpis.repeatRate')}
                 </p>
               </div>
               <Users className="w-8 h-8 text-gray-600" />
@@ -372,11 +374,11 @@ const ExecutiveDashboard = () => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Inventory Turnover</p>
+                <p className="text-sm font-medium text-gray-600">{t('executiveDashboard.kpis.inventoryTurnover')}</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {executiveSummary?.kpis.inventoryTurnover?.toFixed(1) || 0}x
                 </p>
-                <p className="text-sm text-gray-600 mt-1">Annual rate</p>
+                <p className="text-sm text-gray-600 mt-1">{t('executiveDashboard.kpis.annualRate')}</p>
               </div>
               <Package className="w-8 h-8 text-gray-600" />
             </div>
@@ -388,11 +390,11 @@ const ExecutiveDashboard = () => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Low Stock Items</p>
+                <p className="text-sm font-medium text-gray-600">{t('executiveDashboard.kpis.lowStockItems')}</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {executiveSummary?.kpis.lowStockItems || 0}
                 </p>
-                <p className="text-sm text-gray-600 mt-1">Need attention</p>
+                <p className="text-sm text-gray-600 mt-1">{t('executiveDashboard.kpis.needAttention')}</p>
               </div>
               {executiveSummary?.kpis.lowStockItems > 10 ? (
                 <AlertTriangle className="w-8 h-8 text-orange-600" />

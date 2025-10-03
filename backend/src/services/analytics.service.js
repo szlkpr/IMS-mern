@@ -1024,9 +1024,9 @@ class AnalyticsService {
       {
         $group: {
           _id: null,
-          totalRevenue: { $sum: '$saleCost' },
+          totalRevenue: { $sum: { $ifNull: ['$totalAmount', '$saleCost'] } },
           totalSales: { $sum: 1 },
-          averageOrderValue: { $avg: '$saleCost' },
+          averageOrderValue: { $avg: { $ifNull: ['$totalAmount', '$saleCost'] } },
           totalItemsSold: { $sum: { $sum: '$soldProducts.quantity' } }
         }
       }
@@ -1058,7 +1058,7 @@ class AnalyticsService {
         $group: {
           _id: '$customerName',
           totalPurchases: { $sum: 1 },
-          totalSpent: { $sum: '$saleCost' },
+          totalSpent: { $sum: { $ifNull: ['$totalAmount', '$saleCost'] } },
           firstPurchase: { $min: '$createdAt' },
           lastPurchase: { $max: '$createdAt' }
         }
@@ -1154,7 +1154,7 @@ class AnalyticsService {
         $group: {
           _id: '$soldProducts.productId',
           totalQuantity: { $sum: '$soldProducts.quantity' },
-          totalRevenue: { $sum: { $multiply: ['$soldProducts.quantity', '$soldProducts.price'] } }
+          totalRevenue: { $sum: { $multiply: ['$soldProducts.quantity', { $ifNull: ['$soldProducts.unitPrice', '$soldProducts.price'] }] } }
         }
       },
       {
@@ -1209,7 +1209,7 @@ class AnalyticsService {
         $group: {
           _id: '$category._id',
           name: { $first: '$category.name' },
-          totalRevenue: { $sum: { $multiply: ['$soldProducts.quantity', '$soldProducts.price'] } },
+          totalRevenue: { $sum: { $multiply: ['$soldProducts.quantity', { $ifNull: ['$soldProducts.unitPrice', '$soldProducts.price'] }] } },
           totalQuantity: { $sum: '$soldProducts.quantity' }
         }
       },
@@ -1245,7 +1245,7 @@ class AnalyticsService {
         {
           $group: {
             _id: null,
-            totalRevenue: { $sum: '$saleCost' },
+            totalRevenue: { $sum: { $ifNull: ['$totalAmount', '$saleCost'] } },
             totalSales: { $sum: 1 }
           }
         }
@@ -1260,7 +1260,7 @@ class AnalyticsService {
         {
           $group: {
             _id: null,
-            totalRevenue: { $sum: '$saleCost' },
+            totalRevenue: { $sum: { $ifNull: ['$totalAmount', '$saleCost'] } },
             totalSales: { $sum: 1 }
           }
         }
@@ -1431,7 +1431,7 @@ class AnalyticsService {
         $group: {
           _id: { $hour: '$createdAt' },
           salesCount: { $sum: 1 },
-          revenue: { $sum: '$saleCost' }
+          revenue: { $sum: { $ifNull: ['$totalAmount', '$saleCost'] } }
         }
       },
       { $sort: { _id: 1 } }

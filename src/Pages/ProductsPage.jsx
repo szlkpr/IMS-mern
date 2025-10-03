@@ -1,8 +1,11 @@
 import { useEffect, useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import AddProduct from "../Components/AddProduct";
+import EditProduct from "../Components/EditProduct";
 import apiClient from "../api";
 
 export default function ProductsPage({ showAddForm = false }) {
+  const { t } = useTranslation();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,6 +31,7 @@ export default function ProductsPage({ showAddForm = false }) {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [actionLoading, setActionLoading] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -78,7 +82,7 @@ export default function ProductsPage({ showAddForm = false }) {
       } catch (err) {
         if (err.response?.status !== 401 && err.code !== "ECONNABORTED" && err.code !== "ERR_CANCELED") {
           console.error("Error fetching data:", err);
-          setError("Failed to fetch data.");
+          setError(t('common.error'));
         }
         setProducts([]);
       } finally {
@@ -151,8 +155,8 @@ export default function ProductsPage({ showAddForm = false }) {
       
       // Handle nested properties
       if (sortConfig.key === 'category') {
-        aVal = a.category?.name || 'Uncategorized';
-        bVal = b.category?.name || 'Uncategorized';
+        aVal = a.category?.name || t('inventory.uncategorized');
+        bVal = b.category?.name || t('inventory.uncategorized');
       }
       
       // Handle different data types
@@ -222,7 +226,7 @@ export default function ProductsPage({ showAddForm = false }) {
   };
 
   const exportToCSV = () => {
-    const headers = ['Name', 'Brand', 'Category', 'Stock', 'Retail Price', 'Wholesale Price', 'Status', 'Barcode', 'Created Date'];
+    const headers = [t('inventory.name'), t('inventory.brand'), t('inventory.category'), t('inventory.stock'), t('inventory.retailPrice'), t('inventory.wholesalePrice'), t('common.status'), t('inventory.barcode'), t('inventory.createdAt')];
     const selectedData = selectedProducts.length > 0 
       ? products.filter(p => selectedProducts.includes(p._id))
       : filteredAndSortedProducts;
@@ -232,12 +236,12 @@ export default function ProductsPage({ showAddForm = false }) {
       ...selectedData.map(product => {
         const isOutOfStock = product.stock === 0;
         const isLowStock = product.stock <= (product.lowStockThreshold || 5) && product.stock > 0;
-        const status = isOutOfStock ? 'Out of Stock' : isLowStock ? 'Low Stock' : 'In Stock';
+        const status = isOutOfStock ? t('inventory.outOfStock') : isLowStock ? t('inventory.lowStock') : t('inventory.inStock');
         
         return [
           `"${product.name}"`,
           `"${product.brand || ''}"`,
-          `"${product.category?.name || 'Uncategorized'}"`,
+          `"${product.category?.name || t('inventory.uncategorized')}"`,
           product.stock,
           product.retailPrice,
           product.wholesalePrice,
@@ -263,7 +267,7 @@ export default function ProductsPage({ showAddForm = false }) {
     if (!selectedProducts.length || actionLoading) return;
     
     const confirmDelete = window.confirm(
-      `Are you sure you want to delete ${selectedProducts.length} product(s)? This action cannot be undone.`
+      `${t('inventory.confirmDelete')} ${selectedProducts.length} ${t('inventory.products').toLowerCase()}? ${t('inventory.confirmDelete')}`
     );
     
     if (confirmDelete) {
@@ -274,10 +278,10 @@ export default function ProductsPage({ showAddForm = false }) {
         );
         setSelectedProducts([]);
         setRefresh(r => !r);
-        console.log('Products deleted successfully');
+        console.log(t('inventory.productDeleted'));
       } catch (error) {
         console.error('Error deleting products:', error);
-        alert('Failed to delete some products. Please try again.');
+        alert(t('inventory.failedToDelete'));
       } finally {
         setActionLoading(false);
       }
@@ -285,16 +289,14 @@ export default function ProductsPage({ showAddForm = false }) {
   };
 
   const handleEditProduct = (product) => {
-    // This would typically open a modal or navigate to edit page
-    console.log('Edit product:', product.name);
-    // For now, we'll just log it - you can implement a modal later
+    setEditingProduct(product);
   };
 
   const handleDeleteProduct = async (product) => {
     if (actionLoading) return;
     
     const confirmDelete = window.confirm(
-      `Are you sure you want to delete "${product.name}"? This action cannot be undone.`
+      `${t('inventory.confirmDelete')} "${product.name}"?`
     );
     
     if (confirmDelete) {
@@ -302,17 +304,17 @@ export default function ProductsPage({ showAddForm = false }) {
       try {
         await apiClient.delete(`/products/${product._id}`);
         setRefresh(r => !r);
-        console.log('Product deleted successfully');
+        console.log(t('inventory.productDeleted'));
       } catch (error) {
         console.error('Error deleting product:', error);
-        alert('Failed to delete product. Please try again.');
+        alert(t('inventory.failedToDelete'));
       } finally {
         setActionLoading(false);
       }
     }
   };
 
-  if (loading) return <div className="flex justify-center items-center h-64"><div className="text-lg text-gray-600">Loading products...</div></div>;
+  if (loading) return <div className="flex justify-center items-center h-64"><div className="text-lg text-gray-600">{t('common.loading')}</div></div>;
   if (error) return <div className="flex justify-center items-center h-64"><div className="text-lg text-red-600">{error}</div></div>;
 
   return (
@@ -334,7 +336,7 @@ export default function ProductsPage({ showAddForm = false }) {
             className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all transform hover:scale-105 shadow-lg"
           >
             <span className="mr-2">+</span>
-            Add New Product
+            {t('inventory.addNewProduct')}
           </button>
         </div>
       )}
@@ -345,11 +347,11 @@ export default function ProductsPage({ showAddForm = false }) {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                All Products
+                {t('inventory.products')}
               </h2>
               <p className="text-sm text-gray-600 mt-1">
-                {filteredAndSortedProducts.length} of {products.length} products
-                {selectedProducts.length > 0 && ` • ${selectedProducts.length} selected`}
+                {filteredAndSortedProducts.length} {t('common.of')} {products.length} {t('inventory.products').toLowerCase()}
+                {selectedProducts.length > 0 && ` • ${selectedProducts.length} ${t('inventory.selectedItems')}`}
               </p>
             </div>
             
@@ -364,7 +366,7 @@ export default function ProductsPage({ showAddForm = false }) {
                       : 'text-gray-500 hover:text-gray-700'
                   }`}
                 >
-                  Table
+                  {t('inventory.tableView')}
                 </button>
                 <button 
                   onClick={() => setViewMode('grid')}
@@ -374,7 +376,7 @@ export default function ProductsPage({ showAddForm = false }) {
                       : 'text-gray-500 hover:text-gray-700'
                   }`}
                 >
-                  Grid
+                  {t('inventory.gridView')}
                 </button>
               </div>
               
@@ -384,7 +386,7 @@ export default function ProductsPage({ showAddForm = false }) {
                 className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-all flex items-center gap-2"
                 title="Export all filtered products"
               >
-                Export
+                {t('inventory.exportCSV')}
               </button>
               
               {/* Filter Toggle */}
@@ -396,7 +398,7 @@ export default function ProductsPage({ showAddForm = false }) {
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                Filters {Object.values(searchFilters).some(v => v && (typeof v === 'object' ? v.min || v.max : true)) && '•'}
+                {t('inventory.showFilters')} {Object.values(searchFilters).some(v => v && (typeof v === 'object' ? v.min || v.max : true)) && '•'}
               </button>
             </div>
           </div>
@@ -408,10 +410,10 @@ export default function ProductsPage({ showAddForm = false }) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Search Term */}
               <div className="lg:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Search Products</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('inventory.searchProducts')}</label>
                 <input 
                   type="text"
-                  placeholder="Search by name, brand, description..."
+                  placeholder={t('inventory.searchProducts')}
                   value={searchFilters.searchTerm}
                   onChange={(e) => handleFilterChange('searchTerm', e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -420,13 +422,13 @@ export default function ProductsPage({ showAddForm = false }) {
               
               {/* Category Filter */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('inventory.category')}</label>
                 <select 
                   value={searchFilters.category}
                   onChange={(e) => handleFilterChange('category', e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="">All Categories</option>
+                  <option value="">{t('inventory.allCategories')}</option>
                   {categories.map(cat => (
                     <option key={cat._id} value={cat._id}>{cat.name}</option>
                   ))}
@@ -435,28 +437,28 @@ export default function ProductsPage({ showAddForm = false }) {
               
               {/* Stock Status Filter */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Stock Status</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('common.status')}</label>
                 <select 
                   value={searchFilters.stockStatus}
                   onChange={(e) => handleFilterChange('stockStatus', e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="">All Stock Levels</option>
-                  <option value="in-stock">In Stock</option>
-                  <option value="low-stock">Low Stock</option>
-                  <option value="out-of-stock">Out of Stock</option>
+                  <option value="">{t('inventory.allStock')}</option>
+                  <option value="in-stock">{t('inventory.inStock')}</option>
+                  <option value="low-stock">{t('inventory.lowStock')}</option>
+                  <option value="out-of-stock">{t('inventory.outOfStock')}</option>
                 </select>
               </div>
               
               {/* Brand Filter */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Brand</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('inventory.brand')}</label>
                 <select 
                   value={searchFilters.brand}
                   onChange={(e) => handleFilterChange('brand', e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="">All Brands</option>
+                  <option value="">{t('inventory.allBrands')}</option>
                   {filterOptions.brands.map(brand => (
                     <option key={brand} value={brand}>{brand}</option>
                   ))}
@@ -465,13 +467,13 @@ export default function ProductsPage({ showAddForm = false }) {
               
               {/* Variant Filter */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Variant/Quality</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('inventory.variant')}</label>
                 <select 
                   value={searchFilters.variant}
                   onChange={(e) => handleFilterChange('variant', e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="">All Variants/Quality</option>
+                  <option value="">{t('inventory.allVariants')}</option>
                   {filterOptions.variants.map(variant => (
                     <option key={variant} value={variant}>{variant}</option>
                   ))}
@@ -480,7 +482,7 @@ export default function ProductsPage({ showAddForm = false }) {
               
               {/* Price Range */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Min Price</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('inventory.minPrice')}</label>
                 <input 
                   type="number"
                   placeholder="₹0"
@@ -491,7 +493,7 @@ export default function ProductsPage({ showAddForm = false }) {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Max Price</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('inventory.maxPrice')}</label>
                 <input 
                   type="number"
                   placeholder="₹∞"
@@ -504,14 +506,14 @@ export default function ProductsPage({ showAddForm = false }) {
             
             {/* Filter Actions */}
             <div className="flex items-center justify-between mt-4">
-              <div className="text-sm text-gray-500">
-                {filteredAndSortedProducts.length} products match your filters
+                <div className="text-sm text-gray-500">
+                {t('inventory.productsFound', { count: filteredAndSortedProducts.length })}
               </div>
               <button 
                 onClick={clearFilters}
                 className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium"
               >
-                Clear Filters
+                {t('inventory.clearFilters')}
               </button>
             </div>
           </div>
@@ -519,19 +521,19 @@ export default function ProductsPage({ showAddForm = false }) {
         
         {products.length === 0 ? (
           <div className="p-12 text-center">
-            <div className="text-gray-400 text-4xl mb-4 font-bold">NO PRODUCTS</div>
-            <p className="text-gray-500 text-lg">No products found.</p>
-            <p className="text-gray-400 text-sm">Add your first product using the form above.</p>
+            <div className="text-gray-400 text-4xl mb-4 font-bold">{t('inventory.noProducts')}</div>
+            <p className="text-gray-500 text-lg">{t('inventory.noProductsFound')}</p>
+            <p className="text-gray-400 text-sm">{t('inventory.addNewProduct')}</p>
           </div>
         ) : filteredAndSortedProducts.length === 0 ? (
           <div className="p-12 text-center">
-            <div className="text-gray-400 text-4xl mb-4 font-bold">NO MATCHES</div>
-            <p className="text-gray-500 text-lg">No products match your filters.</p>
+            <div className="text-gray-400 text-4xl mb-4 font-bold">{t('inventory.noMatches')}</div>
+            <p className="text-gray-500 text-lg">{t('inventory.noProductsFound')}</p>
             <button 
               onClick={clearFilters}
               className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
-              Clear Filters
+              {t('inventory.clearFilters')}
             </button>
           </div>
         ) : (
@@ -553,7 +555,7 @@ export default function ProductsPage({ showAddForm = false }) {
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                     >
                       <div className="flex items-center gap-1">
-                        Product {getSortIcon('name')}
+                        {t('inventory.productName')} {getSortIcon('name')}
                       </div>
                     </th>
                     <th 
@@ -561,7 +563,7 @@ export default function ProductsPage({ showAddForm = false }) {
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                     >
                       <div className="flex items-center gap-1">
-                        Category {getSortIcon('category')}
+                        {t('inventory.category')} {getSortIcon('category')}
                       </div>
                     </th>
                     <th 
@@ -569,7 +571,7 @@ export default function ProductsPage({ showAddForm = false }) {
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                     >
                       <div className="flex items-center gap-1">
-                        Stock {getSortIcon('stock')}
+                        {t('inventory.stock')} {getSortIcon('stock')}
                       </div>
                     </th>
                     <th 
@@ -577,19 +579,19 @@ export default function ProductsPage({ showAddForm = false }) {
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                     >
                       <div className="flex items-center gap-1">
-                        Prices {getSortIcon('retailPrice')}
+                        {t('inventory.price')} {getSortIcon('retailPrice')}
                       </div>
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('common.status')}</th>
                     <th 
                       onClick={() => handleSort('createdAt')}
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                     >
                       <div className="flex items-center gap-1">
-                        Details {getSortIcon('createdAt')}
+                        {t('common.details')} {getSortIcon('createdAt')}
                       </div>
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('common.actions')}</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -614,25 +616,28 @@ export default function ProductsPage({ showAddForm = false }) {
                         <td className="px-6 py-4">
                           <div>
                             <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                            {product.brand && <div className="text-sm text-gray-500">Brand: {product.brand}</div>}
+                            {product.brand && <div className="text-sm text-gray-500">{t('inventory.brand')}: {product.brand}</div>}
+                            {product.variant && <div className="text-sm text-gray-500">{t('inventory.variant')}: {product.variant}</div>}
                             {product.description && <div className="text-sm text-gray-500 truncate max-w-xs">{product.description}</div>}
-                            {product.barcode && <div className="text-xs text-gray-400">Barcode: {product.barcode}</div>}
+                            <div className="text-xs text-gray-400 mt-1">
+                              {product.barcode ? `${t('inventory.barcode')}: ${product.barcode}` : `ID: ${product._id.slice(-8)}`}
+                            </div>
                           </div>
                         </td>
                         
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {product.category?.name || 'Uncategorized'}
+                          {product.category?.name || t('inventory.uncategorized')}
                         </td>
                         
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900 font-medium">{product.stock}</div>
-                          <div className="text-xs text-gray-500">Alert: {product.lowStockThreshold || 5}</div>
+                          <div className="text-xs text-gray-500">{t('inventory.alert')}: {product.lowStockThreshold || 5}</div>
                         </td>
                         
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">
-                            <div>Retail: ₹{typeof product.retailPrice === 'number' ? product.retailPrice.toFixed(2) : product.retailPrice}</div>
-                            <div>Wholesale: ₹{typeof product.wholesalePrice === 'number' ? product.wholesalePrice.toFixed(2) : product.wholesalePrice}</div>
+                            <div>{t('inventory.retail')}: ₹{typeof product.retailPrice === 'number' ? product.retailPrice.toFixed(2) : product.retailPrice}</div>
+                            <div>{t('inventory.wholesale')}: ₹{typeof product.wholesalePrice === 'number' ? product.wholesalePrice.toFixed(2) : product.wholesalePrice}</div>
                           </div>
                         </td>
                         
@@ -644,15 +649,15 @@ export default function ProductsPage({ showAddForm = false }) {
                               ? 'bg-yellow-100 text-yellow-800'
                               : 'bg-green-100 text-green-800'
                           }`}>
-                            {isOutOfStock ? 'Out of Stock' : isLowStock ? 'Low Stock' : 'In Stock'}
+                            {isOutOfStock ? t('inventory.outOfStock') : isLowStock ? t('inventory.lowStock') : t('inventory.inStock')}
                           </span>
                         </td>
                         
                         <td className="px-6 py-4 text-sm text-gray-500">
-                          {product.variant && <div>Quality/Variant: {product.variant}</div>}
-                          {product.compatibility && <div className="truncate max-w-xs">Compatible with: {product.compatibility}</div>}
+                          {product.variant && <div>{t('inventory.qualityVariant')}: {product.variant}</div>}
+                          {product.compatibility && <div className="truncate max-w-xs">{t('inventory.compatibleWith')}: {product.compatibility}</div>}
                           <div className="text-xs text-gray-400 mt-1">
-                            Added: {new Date(product.createdAt).toLocaleDateString()}
+                            {t('inventory.added')}: {new Date(product.createdAt).toLocaleDateString()}
                           </div>
                         </td>
                         
@@ -661,16 +666,16 @@ export default function ProductsPage({ showAddForm = false }) {
                             <button 
                               onClick={() => handleEditProduct(product)}
                               className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"
-                              title="Edit product"
+                              title={t('inventory.editProduct')}
                             >
-                              Edit
+                              {t('common.edit')}
                             </button>
                             <button 
                               onClick={() => handleDeleteProduct(product)}
                               className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
-                              title="Delete product"
+                              title={t('inventory.deleteProduct')}
                             >
-                              Delete
+                              {t('common.delete')}
                             </button>
                           </div>
                         </td>
@@ -702,16 +707,16 @@ export default function ProductsPage({ showAddForm = false }) {
                             <button 
                               onClick={() => handleEditProduct(product)}
                               className="text-blue-600 hover:text-blue-900 text-sm p-1 rounded hover:bg-blue-50"
-                              title="Edit product"
+                              title={t('inventory.editProduct')}
                             >
-                              Edit
+                              {t('common.edit')}
                             </button>
                             <button 
                               onClick={() => handleDeleteProduct(product)}
                               className="text-red-600 hover:text-red-900 text-sm p-1 rounded hover:bg-red-50"
-                              title="Delete product"
+                              title={t('inventory.deleteProduct')}
                             >
-                              Delete
+                              {t('common.delete')}
                             </button>
                           </div>
                         </div>
@@ -719,13 +724,17 @@ export default function ProductsPage({ showAddForm = false }) {
                         <h3 className="font-medium text-gray-900 mb-2 line-clamp-2">{product.name}</h3>
                         
                         <div className="space-y-2 text-sm text-gray-600">
-                          {product.brand && <div><span className="font-medium">Brand:</span> {product.brand}</div>}
-                          <div><span className="font-medium">Category:</span> {product.category?.name || 'Uncategorized'}</div>
-                          <div><span className="font-medium">Stock:</span> {product.stock} units</div>
+                          {product.brand && <div><span className="font-medium">{t('inventory.brand')}:</span> {product.brand}</div>}
+                          {product.variant && <div><span className="font-medium">{t('inventory.variant')}:</span> {product.variant}</div>}
+                          <div><span className="font-medium">{t('inventory.category')}:</span> {product.category?.name || t('inventory.uncategorized')}</div>
+                          <div><span className="font-medium">{t('inventory.stock')}:</span> {product.stock} {t('inventory.units')}</div>
+                          <div className="text-xs text-gray-400">
+                            {product.barcode ? `${t('inventory.barcode')}: ${product.barcode}` : `ID: ${product._id.slice(-8)}`}
+                          </div>
                           
                           <div className="border-t pt-2">
-                            <div><span className="font-medium">Retail:</span> ₹{typeof product.retailPrice === 'number' ? product.retailPrice.toFixed(2) : product.retailPrice}</div>
-                            <div><span className="font-medium">Wholesale:</span> ₹{typeof product.wholesalePrice === 'number' ? product.wholesalePrice.toFixed(2) : product.wholesalePrice}</div>
+                            <div><span className="font-medium">{t('inventory.retail')}:</span> ₹{typeof product.retailPrice === 'number' ? product.retailPrice.toFixed(2) : product.retailPrice}</div>
+                            <div><span className="font-medium">{t('inventory.wholesale')}:</span> ₹{typeof product.wholesalePrice === 'number' ? product.wholesalePrice.toFixed(2) : product.wholesalePrice}</div>
                           </div>
                           
                           <div className="flex items-center justify-between pt-2">
@@ -736,7 +745,7 @@ export default function ProductsPage({ showAddForm = false }) {
                                 ? 'bg-yellow-100 text-yellow-800'
                                 : 'bg-green-100 text-green-800'
                             }`}>
-                              {isOutOfStock ? 'Out of Stock' : isLowStock ? 'Low Stock' : 'In Stock'}
+                              {isOutOfStock ? t('inventory.outOfStock') : isLowStock ? t('inventory.lowStock') : t('inventory.inStock')}
                             </span>
                           </div>
                           
@@ -770,28 +779,41 @@ export default function ProductsPage({ showAddForm = false }) {
               onClick={exportToCSV}
               disabled={actionLoading}
               className="px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Export selected products to CSV (Ctrl+E)"
+              title={t('inventory.exportSelectedProducts')}
             >
-              Export
+              {t('common.export')}
             </button>
             <button 
               onClick={handleDeleteSelected}
               disabled={actionLoading}
               className="px-4 py-2 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
-              title="Delete selected products (Delete key)"
+              title={t('inventory.deleteSelectedProducts')}
             >
-              {actionLoading ? 'Loading...' : 'Delete'}
+              {actionLoading ? t('common.loading') : t('common.delete')}
             </button>
             <button 
               onClick={() => setSelectedProducts([])}
               disabled={actionLoading}
               className="px-4 py-2 bg-gray-600 text-white rounded text-sm hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Clear selection (Esc)"
+              title={t('inventory.clearSelection')}
             >
-              Clear
+              {t('common.clear')}
             </button>
           </div>
         </div>
+      )}
+      
+      {/* Edit Product Modal */}
+      {editingProduct && (
+        <EditProduct
+          product={editingProduct}
+          categories={categories}
+          onEdit={() => {
+            setRefresh(r => !r);
+            setEditingProduct(null);
+          }}
+          onCancel={() => setEditingProduct(null)}
+        />
       )}
     </div>
   );

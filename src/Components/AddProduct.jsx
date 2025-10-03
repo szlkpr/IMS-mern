@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from 'react-i18next';
 import apiClient from "../api";
 
 export default function AddProduct({ onAdd }) {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -58,36 +60,36 @@ export default function AddProduct({ onAdd }) {
 
   const handleSubmit = async e => {
     e.preventDefault();
-    setMessage("Adding...");
+    setMessage(t('inventory.adding'));
     
     // Basic validation
     if (!form.name.trim()) {
-      setMessage("Product name is required");
+      setMessage(t('inventory.validation.nameRequired'));
       return;
     }
     
     if (!form.description.trim()) {
-      setMessage("Product description is required");
+      setMessage(t('inventory.validation.descriptionRequired'));
       return;
     }
     
     if (!form.category) {
-      setMessage("Please select a category");
+      setMessage(t('inventory.validation.categoryRequired'));
       return;
     }
     
     if (!form.retailPrice || parseFloat(form.retailPrice) <= 0) {
-      setMessage("Valid retail price is required");
+      setMessage(t('inventory.validation.validRetailPriceRequired'));
       return;
     }
     
     if (!form.wholesalePrice || parseFloat(form.wholesalePrice) <= 0) {
-      setMessage("Valid wholesale price is required");
+      setMessage(t('inventory.validation.validWholesalePriceRequired'));
       return;
     }
     
     if (!form.stock || parseInt(form.stock) < 0) {
-      setMessage("Valid stock quantity is required");
+      setMessage(t('inventory.validation.validStockQuantityRequired'));
       return;
     }
     
@@ -121,7 +123,7 @@ export default function AddProduct({ onAdd }) {
       console.log('Submitting product data:', submitData);
       
       await apiClient.post("/products", submitData);
-      setMessage("Product added successfully!");
+      setMessage(t('inventory.messages.productAddedSuccessfully'));
       setForm({
         name: "",
         description: "",
@@ -141,16 +143,37 @@ export default function AddProduct({ onAdd }) {
       console.error("Error adding product:", error);
       console.log('Error response:', error.response?.data);
       
-      // Handle specific MongoDB duplicate key error for barcode
-      if (error.response?.data?.includes && error.response.data.includes('E11000 duplicate key error') && error.response.data.includes('barcode')) {
-        if (error.response.data.includes('dup key: { barcode: null }')) {
-          setMessage("Database error: Multiple products with empty barcodes not allowed. Please provide a unique barcode or leave it empty for the first product only.");
-        } else {
-          setMessage("A product with this barcode already exists. Please use a unique barcode.");
+      // Extract error message from different response formats
+      let errorMessage = t('inventory.errors.failedToAddProduct');
+      
+      if (error.response?.data) {
+        const data = error.response.data;
+        
+        // Handle JSON response
+        if (typeof data === 'object' && data.message) {
+          errorMessage = data.message;
         }
-      } else {
-        setMessage(error.response?.data?.message || "Error adding product");
+        // Handle HTML response (extract from HTML error page)
+        else if (typeof data === 'string') {
+          // Try to extract error message from HTML
+          const match = data.match(/Error: (.+?)</);
+          if (match && match[1]) {
+            errorMessage = match[1];
+          }
+          // Handle specific MongoDB duplicate key errors
+          else if (data.includes('E11000 duplicate key error')) {
+            if (data.includes('barcode')) {
+              errorMessage = t('inventory.errors.barcodeExists');
+            } else if (data.includes('name')) {
+              errorMessage = t('inventory.errors.nameExists');
+            } else {
+              errorMessage = t('inventory.errors.duplicateProduct');
+            }
+          }
+        }
       }
+      
+      setMessage(errorMessage);
     }
   };
 
@@ -167,8 +190,8 @@ export default function AddProduct({ onAdd }) {
               <span className="text-white text-xl">+</span>
             </div>
             <div>
-              <h3 className="text-xl font-bold text-white">Add New Product</h3>
-              <p className="text-blue-100 text-sm">Click to expand the product form</p>
+              <h3 className="text-xl font-bold text-white">{t('inventory.addNewProduct')}</h3>
+              <p className="text-blue-100 text-sm">{t('inventory.clickToExpandForm')}</p>
             </div>
           </div>
           <div className={`text-white text-2xl transform transition-transform ${isCollapsed ? '' : 'rotate-180'}`}>
@@ -200,14 +223,14 @@ export default function AddProduct({ onAdd }) {
           <div className="mb-8">
             <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
               <span className="bg-blue-100 text-blue-600 p-2 rounded-lg mr-3 text-sm font-bold">INFO</span>
-              <span>Basic Information</span>
+              <span>{t('inventory.sections.basicInformation')}</span>
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Product Name *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('inventory.productName')} *</label>
                 <input 
                   name="name" 
-                  placeholder="Enter product name" 
+                  placeholder={t('inventory.enterProductName')}
                   value={form.name} 
                   onChange={handleChange} 
                   required 
@@ -216,10 +239,10 @@ export default function AddProduct({ onAdd }) {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Brand</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('inventory.brand')}</label>
                 <input 
                   name="brand" 
-                  placeholder="Brand name" 
+                  placeholder={t('inventory.enterBrandName')}
                   value={form.brand} 
                   onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
@@ -227,7 +250,7 @@ export default function AddProduct({ onAdd }) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('inventory.category')}</label>
                 <select
                   name="category" 
                   value={form.category} 
@@ -235,7 +258,7 @@ export default function AddProduct({ onAdd }) {
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 >
-                  <option value="">Select a category (optional)</option>
+                  <option value="">{t('inventory.selectCategoryOptional')}</option>
                   {categories.map(category => (
                     <option key={category._id} value={category._id}>
                       {category.name}
@@ -245,10 +268,10 @@ export default function AddProduct({ onAdd }) {
               </div>
 
               <div className="md:col-span-2 lg:col-span-3">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('inventory.description')}</label>
                 <textarea 
                   name="description" 
-                  placeholder="Product description" 
+                  placeholder={t('inventory.enterProductDescription')}
                   value={form.description} 
                   onChange={handleChange}
                   required
@@ -263,11 +286,11 @@ export default function AddProduct({ onAdd }) {
           <div className="mb-8">
             <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
               <span className="bg-green-100 text-green-600 p-2 rounded-lg mr-3 text-sm font-bold">PRICE</span>
-              <span>Pricing Information</span>
+              <span>{t('inventory.sections.pricingInformation')}</span>
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Retail Price *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('inventory.retailPrice')} *</label>
                 <input 
                   type="number" 
                   min="0" 
@@ -282,7 +305,7 @@ export default function AddProduct({ onAdd }) {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Wholesale Price *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('inventory.wholesalePrice')} *</label>
                 <input 
                   type="number" 
                   min="0" 
@@ -302,11 +325,11 @@ export default function AddProduct({ onAdd }) {
           <div className="mb-8">
             <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
               <span className="bg-orange-100 text-orange-600 p-2 rounded-lg mr-3 text-sm font-bold">STOCK</span>
-              <span>Stock Management</span>
+              <span>{t('inventory.sections.stockManagement')}</span>
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Current Stock *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('inventory.stock')} *</label>
                 <input 
                   type="number" 
                   min="0" 
@@ -320,12 +343,12 @@ export default function AddProduct({ onAdd }) {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Low Stock Alert</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('inventory.lowStockThreshold')}</label>
                 <input 
                   type="number" 
                   min="0" 
                   name="lowStockThreshold" 
-                  placeholder="Alert threshold" 
+                  placeholder={t('inventory.alertThresholdPlaceholder')}
                   value={form.lowStockThreshold} 
                   onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
@@ -338,14 +361,14 @@ export default function AddProduct({ onAdd }) {
           <div className="mb-8">
             <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
               <span className="bg-purple-100 text-purple-600 p-2 rounded-lg mr-3 text-sm font-bold">DETAILS</span>
-              <span>Product Details</span>
+              <span>{t('inventory.sections.productDetails')}</span>
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Variant</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('inventory.variant')}</label>
                 <input 
                   name="variant" 
-                  placeholder="e.g., Premium, Standard, Deluxe, Pro" 
+                  placeholder={t('inventory.variantPlaceholder')}
                   value={form.variant} 
                   onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
@@ -353,10 +376,10 @@ export default function AddProduct({ onAdd }) {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Barcode</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('inventory.barcode')}</label>
                 <input 
                   name="barcode" 
-                  placeholder="Product barcode" 
+                  placeholder={t('inventory.barcodePlaceholder')}
                   value={form.barcode} 
                   onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
@@ -366,12 +389,12 @@ export default function AddProduct({ onAdd }) {
 
             {/* Multiple Compatibility Inputs */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Compatible with</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('inventory.compatibility')}</label>
               <div className="space-y-3">
                 {form.compatibility.map((comp, index) => (
                   <div key={index} className="flex items-center space-x-2">
                     <input 
-                      placeholder="e.g., Honda City, Toyota Corolla, Universal Fit" 
+                      placeholder={t('inventory.compatibilityPlaceholder')}
                       value={comp} 
                       onChange={(e) => handleCompatibilityChange(index, e.target.value)}
                       className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
@@ -381,9 +404,9 @@ export default function AddProduct({ onAdd }) {
                         type="button"
                         onClick={() => removeCompatibilityField(index)}
                         className="p-3 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
-                        title="Remove compatibility"
+                        title={t('inventory.removeCompatibility')}
                       >
-                        Remove
+                        {t('inventory.remove')}
                       </button>
                     )}
                     {index === form.compatibility.length - 1 && (
@@ -391,15 +414,15 @@ export default function AddProduct({ onAdd }) {
                         type="button"
                         onClick={addCompatibilityField}
                         className="p-3 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition-colors"
-                        title="Add compatibility"
+                        title={t('inventory.addCompatibility')}
                       >
-                        Add
+                        {t('inventory.add')}
                       </button>
                     )}
                   </div>
                 ))}
               </div>
-              <p className="text-xs text-gray-500 mt-2">Add multiple compatibility options (vehicles, models, applications) for better searchability</p>
+              <p className="text-xs text-gray-500 mt-2">{t('inventory.compatibilityHelpText')}</p>
             </div>
           </div>
           
@@ -410,13 +433,13 @@ export default function AddProduct({ onAdd }) {
               onClick={() => setIsCollapsed(true)}
               className="px-6 py-3 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors"
             >
-              Cancel
+              {t('common.cancel')}
             </button>
             <button 
               type="submit" 
               className="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all transform hover:scale-105"
             >
-              Add Product
+              {t('inventory.addProduct')}
             </button>
           </div>
         </form>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import inventoryDataService from '../services/inventoryDataService';
 import { 
   SalesTrendChart, 
@@ -16,6 +17,7 @@ import {
 } from '../Components/ReportsAnalyticsCommon';
 
 const AnalyticsDashboard = () => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -60,7 +62,7 @@ const AnalyticsDashboard = () => {
       
     } catch (err) {
       console.error('Error fetching analytics data:', err);
-      setError('Failed to load analytics data');
+      setError(t('analytics.failedToLoadData'));
     } finally {
       setLoading(false);
     }
@@ -77,7 +79,7 @@ const AnalyticsDashboard = () => {
   }, []);
 
   if (loading) {
-    return <LoadingSpinner title="Loading Analytics..." subtitle="Processing business data" />;
+    return <LoadingSpinner title={t('analytics.loadingAnalytics')} subtitle={t('analytics.processingData')} />;
   }
 
   if (error) {
@@ -92,16 +94,16 @@ const AnalyticsDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-slate-900 mb-2">
-                Analytics Dashboard
+                {t('analytics.title')}
               </h1>
-              <p className="text-slate-600">Business intelligence and data visualization</p>
+              <p className="text-slate-600">{t('analytics.subtitle')}</p>
               <div className="flex items-center mt-3 space-x-4">
                 <div className="flex items-center text-sm text-slate-500">
                   <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                  Real-time Data
+                  {t('analytics.realTimeData')}
                 </div>
                 <div className="text-sm text-slate-500">
-                  Last updated: {new Date().toLocaleTimeString()}
+                  {t('analytics.lastUpdated')}: {new Date().toLocaleTimeString()}
                 </div>
               </div>
             </div>
@@ -111,7 +113,7 @@ const AnalyticsDashboard = () => {
                 disabled={refreshing}
                 className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span>{refreshing ? 'Refreshing...' : 'Refresh'}</span>
+                <span>{refreshing ? t('analytics.refreshing') : t('analytics.refresh')}</span>
               </button>
             </div>
           </div>
@@ -123,11 +125,11 @@ const AnalyticsDashboard = () => {
             <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-2xl"></div>
             <div className="relative flex items-center justify-between">
               <div className="space-y-2">
-                <p className="text-blue-100 text-sm font-medium uppercase tracking-wide">Total Revenue</p>
+                <p className="text-blue-100 text-sm font-medium uppercase tracking-wide">{t('analytics.kpis.totalRevenue')}</p>
                   <p className="text-3xl font-bold">₹{(kpis.totalRevenue || 0).toLocaleString()}</p>
                 <p className="text-blue-200 text-sm flex items-center">
                   <span className="w-2 h-2 bg-blue-300 rounded-full mr-2"></span>
-                  All time
+                  {t('analytics.kpis.allTime')}
                 </p>
               </div>
               <div className="w-16 h-16 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-lg opacity-90 group-hover:scale-110 transition-transform duration-300">REV</div>
@@ -139,11 +141,11 @@ const AnalyticsDashboard = () => {
             <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-2xl"></div>
             <div className="relative flex items-center justify-between">
               <div className="space-y-2">
-                <p className="text-green-100 text-sm font-medium uppercase tracking-wide">Total Sales</p>
+                <p className="text-green-100 text-sm font-medium uppercase tracking-wide">{t('analytics.kpis.totalSales')}</p>
                 <p className="text-3xl font-bold">{kpis.totalSales || 0}</p>
                 <p className="text-green-200 text-sm flex items-center">
                   <span className="w-2 h-2 bg-green-300 rounded-full mr-2"></span>
-                  Transactions
+                  {t('analytics.kpis.transactions')}
                 </p>
               </div>
               <div className="w-16 h-16 bg-green-500 rounded-lg flex items-center justify-center text-white font-bold text-lg opacity-90 group-hover:scale-110 transition-transform duration-300">SALES</div>
@@ -155,11 +157,11 @@ const AnalyticsDashboard = () => {
             <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-2xl"></div>
             <div className="relative flex items-center justify-between">
               <div className="space-y-2">
-                <p className="text-purple-100 text-sm font-medium uppercase tracking-wide">Avg Order Value</p>
+                <p className="text-purple-100 text-sm font-medium uppercase tracking-wide">{t('analytics.kpis.avgOrderValue')}</p>
                 <p className="text-3xl font-bold">₹{(kpis.averageOrderValue || 0).toFixed(2)}</p>
                 <p className="text-purple-200 text-sm flex items-center">
                   <span className="w-2 h-2 bg-purple-300 rounded-full mr-2"></span>
-                  Per transaction
+                  {t('analytics.kpis.perTransaction')}
                 </p>
               </div>
               <div className="w-16 h-16 bg-purple-500 rounded-lg flex items-center justify-center text-white font-bold text-lg opacity-90 group-hover:scale-110 transition-transform duration-300">AOV</div>
@@ -171,11 +173,11 @@ const AnalyticsDashboard = () => {
             <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-2xl"></div>
             <div className="relative flex items-center justify-between">
               <div className="space-y-2">
-                <p className="text-orange-100 text-sm font-medium uppercase tracking-wide">Total Products</p>
+                <p className="text-orange-100 text-sm font-medium uppercase tracking-wide">{t('analytics.kpis.totalProducts')}</p>
                 <p className="text-3xl font-bold">{inventoryStatus.totalProducts || 0}</p>
                 <p className="text-orange-200 text-sm flex items-center">
                   <span className="w-2 h-2 bg-orange-300 rounded-full mr-2"></span>
-                  In inventory
+                  {t('analytics.kpis.inInventory')}
                 </p>
               </div>
               <div className="w-16 h-16 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold text-lg opacity-90 group-hover:scale-110 transition-transform duration-300">PROD</div>
@@ -191,16 +193,16 @@ const AnalyticsDashboard = () => {
               SA
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-slate-800">Sales Analytics</h2>
-              <p className="text-slate-600">Performance trends and revenue analysis</p>
+              <h2 className="text-2xl font-bold text-slate-800">{t('analytics.sections.salesAnalytics')}</h2>
+              <p className="text-slate-600">{t('analytics.sections.performanceTrends')}</p>
             </div>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
-              <SalesTrendChart data={salesTrend} title="Sales Trend Over Time" />
+              <SalesTrendChart data={salesTrend} title={t('analytics.charts.salesTrendOverTime')} />
             </div>
             <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
-              <RevenueChart salesData={revenueData} title="Revenue vs Sales Count" />
+              <RevenueChart salesData={revenueData} title={t('analytics.charts.revenueVsSalesCount')} />
             </div>
           </div>
         </div>
@@ -212,16 +214,16 @@ const AnalyticsDashboard = () => {
               PP
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-slate-800">Product Performance</h2>
-              <p className="text-slate-600">Top sellers and profit margin analysis</p>
+              <h2 className="text-2xl font-bold text-slate-800">{t('analytics.sections.productPerformance')}</h2>
+              <p className="text-slate-600">{t('analytics.sections.topSellersAnalysis')}</p>
             </div>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
-              <TopProductsChart data={topProducts} title="Top Selling Products" />
+              <TopProductsChart data={topProducts} title={t('analytics.charts.topSellingProducts')} />
             </div>
             <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
-              <ProfitMarginChart data={profitMargins} title="Product Profit Margins" />
+              <ProfitMarginChart data={profitMargins} title={t('analytics.charts.productProfitMargins')} />
             </div>
           </div>
         </div>
@@ -233,16 +235,16 @@ const AnalyticsDashboard = () => {
               IM
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-slate-800">Inventory Management</h2>
-              <p className="text-slate-600">Stock levels and inventory value tracking</p>
+              <h2 className="text-2xl font-bold text-slate-800">{t('analytics.sections.inventoryManagement')}</h2>
+              <p className="text-slate-600">{t('analytics.sections.stockLevelsTracking')}</p>
             </div>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
-              <InventoryStatusChart data={inventoryStatus} title="Current Stock Status" />
+              <InventoryStatusChart data={inventoryStatus} title={t('analytics.charts.currentStockStatus')} />
             </div>
             <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
-              <StockValueChart data={stockValue} title="Inventory Value by Product" />
+              <StockValueChart data={stockValue} title={t('analytics.charts.inventoryValueByProduct')} />
             </div>
           </div>
         </div>
@@ -254,16 +256,16 @@ const AnalyticsDashboard = () => {
               CA
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-slate-800">Category & Real-time Analysis</h2>
-              <p className="text-slate-600">Category breakdown and hourly sales tracking</p>
+              <h2 className="text-2xl font-bold text-slate-800">{t('analytics.sections.categoryRealTimeAnalysis')}</h2>
+              <p className="text-slate-600">{t('analytics.sections.categoryBreakdownTracking')}</p>
             </div>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
-              <CategoryChart data={categoryData} title="Sales by Category" />
+              <CategoryChart data={categoryData} title={t('analytics.charts.salesByCategory')} />
             </div>
             <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
-              <HourlySalesChart data={hourlySales} title="Today's Hourly Sales" />
+              <HourlySalesChart data={hourlySales} title={t('analytics.charts.todaysHourlySales')} />
             </div>
           </div>
         </div>
@@ -275,8 +277,8 @@ const AnalyticsDashboard = () => {
               BI
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-slate-800">Business Intelligence Summary</h3>
-              <p className="text-slate-600">Key performance indicators at a glance</p>
+              <h3 className="text-2xl font-bold text-slate-800">{t('analytics.sections.businessIntelligenceSummary')}</h3>
+              <p className="text-slate-600">{t('analytics.sections.keyPerformanceIndicators')}</p>
             </div>
           </div>
           
@@ -287,11 +289,11 @@ const AnalyticsDashboard = () => {
                   PM
                 </div>
                 <div>
-                  <p className="text-slate-600 font-medium">Profit Margin</p>
+                  <p className="text-slate-600 font-medium">{t('analytics.summary.profitMargin')}</p>
                   <p className="text-3xl font-bold text-green-600">
-                    {kpis.grossProfitMargin ? `${kpis.grossProfitMargin.toFixed(1)}%` : 'N/A'}
+                    {kpis.grossProfitMargin ? `${kpis.grossProfitMargin.toFixed(1)}%` : t('analytics.na')}
                   </p>
-                  <p className="text-green-600 text-sm">Gross margin</p>
+                  <p className="text-green-600 text-sm">{t('analytics.summary.grossMargin')}</p>
                 </div>
               </div>
             </div>
@@ -302,9 +304,9 @@ const AnalyticsDashboard = () => {
                   LOW
                 </div>
                 <div>
-                  <p className="text-slate-600 font-medium">Low Stock Items</p>
+                  <p className="text-slate-600 font-medium">{t('analytics.summary.lowStockItems')}</p>
                   <p className="text-3xl font-bold text-amber-600">{inventoryStatus.lowStockItems || 0}</p>
-                  <p className="text-amber-600 text-sm">Needs attention</p>
+                  <p className="text-amber-600 text-sm">{t('analytics.summary.needsAttention')}</p>
                 </div>
               </div>
             </div>
@@ -315,9 +317,9 @@ const AnalyticsDashboard = () => {
                   CUST
                 </div>
                 <div>
-                  <p className="text-slate-600 font-medium">Total Customers</p>
+                  <p className="text-slate-600 font-medium">{t('analytics.summary.totalCustomers')}</p>
                   <p className="text-3xl font-bold text-blue-600">{kpis.totalCustomers || 0}</p>
-                  <p className="text-blue-600 text-sm">Active clients</p>
+                  <p className="text-blue-600 text-sm">{t('analytics.summary.activeClients')}</p>
                 </div>
               </div>
             </div>
@@ -330,19 +332,19 @@ const AnalyticsDashboard = () => {
             <div className="flex items-center space-x-4">
               <div className="flex items-center text-slate-600">
                 <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-                <span className="font-medium">Real-time Analytics</span>
+                <span className="font-medium">{t('analytics.footer.realTimeAnalytics')}</span>
               </div>
               <div className="text-slate-500">
-                Powered by Chart.js
+                {t('analytics.footer.poweredBy')}
               </div>
             </div>
             
             <div className="flex items-center space-x-6 text-slate-500">
               <div className="flex items-center">
-                <span>Updated: {new Date().toLocaleString()}</span>
+                <span>{t('analytics.footer.updated')}: {new Date().toLocaleString()}</span>
               </div>
               <div className="flex items-center">
-                <span>Enterprise Analytics v2.0</span>
+                <span>{t('analytics.footer.enterpriseAnalytics')}</span>
               </div>
             </div>
           </div>

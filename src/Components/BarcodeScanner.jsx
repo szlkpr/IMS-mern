@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function BarcodeScanner({ isOpen, onClose, onDetected }) {
+  const { t } = useTranslation();
   const [error, setError] = useState('');
   const [isScanning, setIsScanning] = useState(false);
   const [manualBarcode, setManualBarcode] = useState('');
@@ -27,7 +29,7 @@ export default function BarcodeScanner({ isOpen, onClose, onDetected }) {
       }
     } catch (err) {
       console.error('Error accessing camera:', err);
-      setError('Unable to access camera. Please check permissions or use manual entry.');
+      setError(t('barcodeScanner.cameraAccessError'));
       setUseCamera(false);
     }
   };
@@ -99,11 +101,11 @@ export default function BarcodeScanner({ isOpen, onClose, onDetected }) {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Barcode Scanner</h3>
+          <h3 className="text-lg font-semibold text-gray-900">{t('barcodeScanner.title')}</h3>
           <button
             onClick={handleClose}
             className="text-gray-400 hover:text-gray-600 text-2xl"
-            aria-label="Close"
+            aria-label={t('common.close')}
           >
             ×
           </button>
@@ -120,7 +122,7 @@ export default function BarcodeScanner({ isOpen, onClose, onDetected }) {
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              Camera Scanner
+              {t('barcodeScanner.cameraScanner')}
             </button>
             <button
               onClick={() => setUseCamera(false)}
@@ -130,7 +132,7 @@ export default function BarcodeScanner({ isOpen, onClose, onDetected }) {
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              Manual Entry
+              {t('barcodeScanner.manualEntry')}
             </button>
           </div>
         </div>
@@ -162,7 +164,7 @@ export default function BarcodeScanner({ isOpen, onClose, onDetected }) {
             {/* Camera Instructions */}
             <div className="text-center">
               <p className="text-sm text-gray-600 mb-3">
-                Point the camera at a barcode to scan it automatically
+                {t('barcodeScanner.cameraInstructions')}
               </p>
               
               {/* Simulate Detection Button (for demo purposes) */}
@@ -170,7 +172,7 @@ export default function BarcodeScanner({ isOpen, onClose, onDetected }) {
                 onClick={simulateBarcodeDetection}
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
               >
-Simulate Detection (Demo)
+                {t('barcodeScanner.simulateDetection')}
               </button>
             </div>
           </div>
@@ -180,14 +182,14 @@ Simulate Detection (Demo)
             <form onSubmit={handleManualSubmit}>
               <div>
                 <label htmlFor="manualBarcode" className="block text-sm font-medium text-gray-700 mb-2">
-                  Enter Barcode Manually
+                  {t('barcodeScanner.enterBarcodeManually')}
                 </label>
                 <input
                   type="text"
                   id="manualBarcode"
                   value={manualBarcode}
                   onChange={(e) => setManualBarcode(e.target.value)}
-                  placeholder="Scan or type barcode..."
+                  placeholder={t('barcodeScanner.scanOrTypePlaceholder')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   autoFocus
                 />
@@ -199,7 +201,7 @@ Simulate Detection (Demo)
                   disabled={!manualBarcode.trim()}
                   className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                 >
-                  Search Product
+                  {t('barcodeScanner.searchProduct')}
                 </button>
               </div>
             </form>
@@ -207,10 +209,10 @@ Simulate Detection (Demo)
             {/* Manual Entry Instructions */}
             <div className="text-center">
               <p className="text-sm text-gray-600">
-                Type or paste the barcode number above, or switch to camera mode to scan automatically.
+                {t('barcodeScanner.manualInstructions')}
               </p>
               <p className="text-xs text-gray-500 mt-2">
-                Auto-search triggers after typing 8-14 characters
+                {t('barcodeScanner.autoSearchInfo')}
               </p>
             </div>
           </div>
@@ -220,13 +222,13 @@ Simulate Detection (Demo)
         <div className="mt-6 pt-4 border-t border-gray-200">
           <div className="flex justify-between items-center">
             <div className="text-xs text-gray-500">
-              {isScanning ? 'Camera Active' : 'Camera Inactive'}
+              {isScanning ? t('barcodeScanner.cameraActive') : t('barcodeScanner.cameraInactive')}
             </div>
             <button
               onClick={handleClose}
               className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors"
             >
-              Cancel
+              {t('common.cancel')}
             </button>
           </div>
         </div>

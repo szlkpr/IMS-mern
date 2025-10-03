@@ -40,14 +40,8 @@ const createProduct = asyncHandler(async (req, res) => {
         throw new ApiError(404, "The category you are trying to assign does not exist.");
     }
 
-    // 4. Check if a product with the same name already exists
-    const existingProduct = await Product.findOne({ name });
-    if (existingProduct) {
-        throw new ApiError(409, `A product with the name '${name}' already exists.`);
-    }
-
-    // 5. Create the product in the database
-    const product = await Product.create({
+    // 4. Create the product in the database
+    const productData = {
         name,
         description,
         retailPrice,
@@ -55,12 +49,18 @@ const createProduct = asyncHandler(async (req, res) => {
         wholesaleThreshold,
         stock,
         category,
-        barcode: barcode || undefined, // Ensure barcode is not an empty string if not provided
         // Optional new fields
         brand: brand || '',
         variant: variant || '',
         compatibility: compatibility || ''
-    });
+    };
+    
+    // Only add barcode field if it's provided and not empty
+    if (barcode && barcode.trim() !== '') {
+        productData.barcode = barcode.trim();
+    }
+    
+    const product = await Product.create(productData);
 
     if (!product) {
         throw new ApiError(500, "Something went wrong while creating the product.");
@@ -207,8 +207,16 @@ const updateProduct = asyncHandler(async (req, res) => {
     if (wholesalePrice !== undefined) product.wholesalePrice = wholesalePrice;
     if (wholesaleThreshold !== undefined) product.wholesaleThreshold = wholesaleThreshold;
     if (stock !== undefined) product.stock = stock;
-    // Use hasOwnProperty to allow setting barcode to null or an empty string to remove it
-    if (Object.prototype.hasOwnProperty.call(req.body, 'barcode')) product.barcode = barcode || undefined;
+    
+    // Handle barcode field properly
+    if (Object.prototype.hasOwnProperty.call(req.body, 'barcode')) {
+        if (barcode && barcode.trim() !== '') {
+            product.barcode = barcode.trim();
+        } else {
+            // Remove barcode field if empty
+            product.barcode = undefined;
+        }
+    }
     
     // Update new optional fields
     if (Object.prototype.hasOwnProperty.call(req.body, 'brand')) product.brand = brand || '';

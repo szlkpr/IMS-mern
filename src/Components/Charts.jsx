@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -157,14 +158,17 @@ const ChartEmptyState = ({ icon, message, subtitle, height = "h-64" }) => (
 );
 
 // Sales Trend Line Chart with enhanced styling
-export const SalesTrendChart = ({ data, title = "Sales Trend", showContainer = true }) => {
+export const SalesTrendChart = ({ data, title, showContainer = true }) => {
+  const { t } = useTranslation();
+  const chartTitle = title || t('charts.salesTrend');
+  
   if (!data || data.length === 0) {
     return (
-      <ChartContainer title={showContainer ? title : null} showBorder={showContainer}>
+      <ChartContainer title={showContainer ? chartTitle : null} showBorder={showContainer}>
         <ChartEmptyState 
           icon="TREND" 
-          message="No Sales Data Available" 
-          subtitle="Sales trends will appear here once transactions are recorded"
+          message={t('charts.noSalesDataAvailable')} 
+          subtitle={t('charts.salesTrendsSubtitle')}
           height="h-60"
         />
       </ChartContainer>
@@ -181,7 +185,7 @@ export const SalesTrendChart = ({ data, title = "Sales Trend", showContainer = t
     }),
     datasets: [
       {
-        label: 'Revenue (₹)',
+        label: t('charts.revenueCurrency'),
         data: data.map(item => item.revenue || item.totalRevenue || 0),
         borderColor: professionalColors.primary.main,
         backgroundColor: professionalColors.primary.bg,
@@ -203,7 +207,7 @@ export const SalesTrendChart = ({ data, title = "Sales Trend", showContainer = t
       ...commonOptions.plugins,
       title: {
         display: true,
-        text: title,
+        text: chartTitle,
         font: {
           size: 18,
           weight: 'bold',
@@ -254,7 +258,7 @@ export const SalesTrendChart = ({ data, title = "Sales Trend", showContainer = t
   );
 
   return showContainer ? (
-    <ChartContainer title={title}>
+    <ChartContainer title={chartTitle}>
       <ChartContent />
     </ChartContainer>
   ) : (
@@ -263,14 +267,17 @@ export const SalesTrendChart = ({ data, title = "Sales Trend", showContainer = t
 };
 
 // Top Products Bar Chart
-export const TopProductsChart = ({ data, title = "Top Selling Products", showContainer = true }) => {
+export const TopProductsChart = ({ data, title, showContainer = true }) => {
+  const { t } = useTranslation();
+  const chartTitle = title || t('charts.topSellingProducts');
+  
   if (!data || data.length === 0) {
     return (
-      <ChartContainer title={showContainer ? title : null} showBorder={showContainer}>
+      <ChartContainer title={showContainer ? chartTitle : null} showBorder={showContainer}>
         <ChartEmptyState 
           icon="PROD" 
-          message="No Product Data Available" 
-          subtitle="Top selling products will appear here once sales are recorded"
+          message={t('charts.noProductDataAvailable')} 
+          subtitle={t('charts.topProductsSubtitle')}
           height="h-60"
         />
       </ChartContainer>
@@ -279,13 +286,13 @@ export const TopProductsChart = ({ data, title = "Top Selling Products", showCon
 
   const chartData = {
     labels: data.slice(0, 5).map(item => 
-      (item.productName || item.name || item._id?.productName || 'Unknown Product').length > 15 
-        ? (item.productName || item.name || item._id?.productName || 'Unknown Product').substring(0, 15) + '...' 
-        : (item.productName || item.name || item._id?.productName || 'Unknown Product')
+      (item.productName || item.name || item._id?.productName || t('charts.unknownProduct')).length > 15
+        ? (item.productName || item.name || item._id?.productName || t('charts.unknownProduct')).substring(0, 15) + '...' 
+        : (item.productName || item.name || item._id?.productName || t('charts.unknownProduct'))
     ),
     datasets: [
       {
-        label: 'Quantity Sold',
+        label: t('charts.quantitySold'),
         data: data.slice(0, 5).map(item => item.totalQuantity || item.quantity || 0),
         backgroundColor: [
           professionalColors.primary.main + '99', // 60% opacity
@@ -312,7 +319,7 @@ export const TopProductsChart = ({ data, title = "Top Selling Products", showCon
       ...commonOptions.plugins,
       title: {
         display: !showContainer,
-        text: title,
+        text: chartTitle,
         font: {
           size: 16,
           weight: 'bold',
@@ -354,7 +361,7 @@ export const TopProductsChart = ({ data, title = "Top Selling Products", showCon
   );
 
   return showContainer ? (
-    <ChartContainer title={title}>
+    <ChartContainer title={chartTitle}>
       <ChartContent />
     </ChartContainer>
   ) : (
@@ -363,14 +370,17 @@ export const TopProductsChart = ({ data, title = "Top Selling Products", showCon
 };
 
 // Inventory Status Doughnut Chart
-export const InventoryStatusChart = ({ data, title = "Inventory Status", showContainer = true }) => {
+export const InventoryStatusChart = ({ data, title, showContainer = true }) => {
+  const { t } = useTranslation();
+  const chartTitle = title || t('charts.inventoryStatus');
+  
   if (!data) {
     return (
-      <ChartContainer title={showContainer ? title : null} showBorder={showContainer}>
+      <ChartContainer title={showContainer ? chartTitle : null} showBorder={showContainer}>
         <ChartEmptyState 
           icon="INV" 
-          message="No Inventory Data Available" 
-          subtitle="Inventory status will appear here once products are added"
+          message={t('charts.noInventoryDataAvailable')} 
+          subtitle={t('charts.inventoryStatusSubtitle')}
           height="h-60"
         />
       </ChartContainer>
@@ -383,7 +393,7 @@ export const InventoryStatusChart = ({ data, title = "Inventory Status", showCon
   const inStockItems = Math.max(0, totalProducts - lowStockItems - outOfStockItems);
   
   const chartData = {
-    labels: ['In Stock', 'Low Stock', 'Out of Stock'],
+    labels: [t('charts.inStock'), t('charts.lowStock'), t('charts.outOfStock')],
     datasets: [
       {
         data: [inStockItems, lowStockItems, outOfStockItems],
@@ -408,7 +418,7 @@ export const InventoryStatusChart = ({ data, title = "Inventory Status", showCon
       ...commonOptions.plugins,
       title: {
         display: !showContainer,
-        text: title,
+        text: chartTitle,
         font: {
           size: 16,
           weight: 'bold',
@@ -427,7 +437,7 @@ export const InventoryStatusChart = ({ data, title = "Inventory Status", showCon
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center">
             <div className="text-2xl font-bold text-slate-800">{inStockItems + lowStockItems + outOfStockItems}</div>
-            <div className="text-xs text-slate-500">Total Items</div>
+            <div className="text-xs text-slate-500">{t('charts.totalItems')}</div>
           </div>
         </div>
       </div>
@@ -435,7 +445,7 @@ export const InventoryStatusChart = ({ data, title = "Inventory Status", showCon
   );
 
   return showContainer ? (
-    <ChartContainer title={title}>
+    <ChartContainer title={chartTitle}>
       <ChartContent />
     </ChartContainer>
   ) : (

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import apiClient from '../api';
 import axios from 'axios';
 
 const PurchasesPage = ({ showAddForm = false }) => {
+  const { t } = useTranslation();
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState('');
   const [vendorContact, setVendorContact] = useState('');
@@ -65,7 +67,7 @@ const PurchasesPage = ({ showAddForm = false }) => {
     const numPrice = parseFloat(price);
 
     if (!supplierName || !vendorContact || !selectedProduct || !quantity || !price || isNaN(numQuantity) || numQuantity <= 0 || isNaN(numPrice) || numPrice <= 0) {
-      setMessage('Please fill in all fields correctly.');
+      setMessage(t('purchases.pleaseFillAllFields'));
       setIsSubmitting(false);
       return;
     }
@@ -79,7 +81,7 @@ const PurchasesPage = ({ showAddForm = false }) => {
       };
 
       const response = await apiClient.post('/purchases', payload);
-      setMessage('Purchase added successfully!');
+      setMessage(t('purchases.purchaseAddedSuccessfully'));
 
       // Optimistically update the UI
       setPurchases(prevPurchases => [response.data.data, ...prevPurchases]);
@@ -102,7 +104,7 @@ const PurchasesPage = ({ showAddForm = false }) => {
       // We only need to handle other errors here.
       if (error.response?.status !== 401) {
         console.error('Error adding purchase:', error);
-        const errorMessage = error.response?.data?.message || 'Failed to add purchase. Please check the console for details.';
+        const errorMessage = error.response?.data?.message || t('purchases.failedToAddPurchase');
         setMessage(errorMessage);
       }
     } finally {
@@ -110,7 +112,7 @@ const PurchasesPage = ({ showAddForm = false }) => {
     }
   };
 
-  if (loading) return <div>Loading purchases data...</div>;
+  if (loading) return <div>{t('purchases.loadingPurchasesData')}</div>;
 
   return (
     <div className="max-w-6xl mx-auto p-6">
@@ -120,15 +122,15 @@ const PurchasesPage = ({ showAddForm = false }) => {
           <div className="mb-6">
             <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">Add New Purchase Order</h2>
-                <p className="text-gray-600">Record new inventory purchases and restock products</p>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">{t('purchases.addNewPurchaseOrder')}</h2>
+                <p className="text-gray-600">{t('purchases.recordNewInventory')}</p>
               </div>
               {!showAddForm && (
                 <button
                   onClick={() => setForceShowAddForm(false)}
                   className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
               )}
             </div>
@@ -147,14 +149,14 @@ const PurchasesPage = ({ showAddForm = false }) => {
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label htmlFor="supplierName" className="block text-sm font-medium text-gray-700 mb-1">
-              Supplier Name *
+              {t('purchases.supplierName')} *
             </label>
             <input
               type="text"
               id="supplierName"
               value={supplierName}
               onChange={(e) => setSupplierName(e.target.value)}
-              placeholder="Enter supplier name"
+              placeholder={t('purchases.enterSupplierName')}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
@@ -162,14 +164,14 @@ const PurchasesPage = ({ showAddForm = false }) => {
           
           <div>
             <label htmlFor="vendorContact" className="block text-sm font-medium text-gray-700 mb-1">
-              Vendor Contact *
+              {t('purchases.vendorContact')} *
             </label>
             <input
               type="text"
               id="vendorContact"
               value={vendorContact}
               onChange={(e) => setVendorContact(e.target.value)}
-              placeholder="Phone number or email"
+              placeholder={t('purchases.phoneNumberOrEmail')}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
@@ -177,7 +179,7 @@ const PurchasesPage = ({ showAddForm = false }) => {
           
           <div>
             <label htmlFor="product" className="block text-sm font-medium text-gray-700 mb-1">
-              Product *
+              {t('purchases.product')} *
             </label>
             <select
               id="product"
@@ -186,10 +188,10 @@ const PurchasesPage = ({ showAddForm = false }) => {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             >
-              <option value="" disabled>Select a product</option>
+              <option value="" disabled>{t('purchases.selectProduct')}</option>
               {products.map((product) => (
                 <option key={product._id} value={product._id}>
-                  {product.name} {product.brand ? `(${product.brand})` : ''} - Current Stock: {product.stock}
+                  {product.name} {product.brand ? `(${product.brand})` : ''} - {t('purchases.currentStock')}: {product.stock}
                 </option>
               ))}
             </select>
@@ -197,14 +199,14 @@ const PurchasesPage = ({ showAddForm = false }) => {
           
           <div>
             <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-1">
-              Quantity *
+              {t('purchases.quantity')} *
             </label>
             <input
               type="number"
               id="quantity"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
-              placeholder="Enter quantity"
+              placeholder={t('purchases.enterQuantity')}
               min="1"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
@@ -213,7 +215,7 @@ const PurchasesPage = ({ showAddForm = false }) => {
           
           <div>
             <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
-              Purchase Price (per item) *
+              {t('purchases.purchasePrice')} *
             </label>
             <div className="relative">
               <span className="absolute left-3 top-2 text-gray-500">₹</span>
@@ -233,7 +235,7 @@ const PurchasesPage = ({ showAddForm = false }) => {
           
           <div className="flex items-center">
             <div className="bg-gray-50 p-3 rounded-md">
-              <p className="text-sm text-gray-600">Total Cost:</p>
+              <p className="text-sm text-gray-600">{t('purchases.totalCost')}:</p>
               <p className="text-xl font-bold text-gray-900">
                 ₹{quantity && price ? (parseInt(quantity) * parseFloat(price)).toFixed(2) : '0.00'}
               </p>
@@ -246,7 +248,7 @@ const PurchasesPage = ({ showAddForm = false }) => {
               disabled={isSubmitting}
               className="w-full md:w-auto px-6 py-3 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
             >
-              {isSubmitting ? 'Recording Purchase...' : 'Record Purchase'}
+              {isSubmitting ? t('purchases.recordingPurchase') : t('purchases.recordPurchase')}
             </button>
           </div>
         </form>
@@ -261,7 +263,7 @@ const PurchasesPage = ({ showAddForm = false }) => {
             className="px-6 py-3 bg-gradient-to-r from-orange-600 to-orange-700 text-white font-medium rounded-lg hover:from-orange-700 hover:to-orange-800 transition-all transform hover:scale-105 shadow-lg"
           >
             <span className="mr-2">+</span>
-            Add New Purchase
+            {t('purchases.addNewPurchase')}
           </button>
         </div>
       )}
@@ -269,27 +271,27 @@ const PurchasesPage = ({ showAddForm = false }) => {
       {/* Purchases History */}
       <div className="bg-white rounded-lg shadow-md">
         <div className="p-6 border-b">
-          <h2 className="text-xl font-bold text-gray-800">Purchase History</h2>
-          <p className="text-sm text-gray-600 mt-1">{purchases.length} purchase orders total</p>
+          <h2 className="text-xl font-bold text-gray-800">{t('purchases.purchaseHistory')}</h2>
+          <p className="text-sm text-gray-600 mt-1">{purchases.length} {t('purchases.purchaseOrdersTotal')}</p>
         </div>
         
         {purchases.length === 0 ? (
           <div className="p-12 text-center">
             <div className="text-gray-400 text-6xl mb-4">🛒</div>
-            <p className="text-gray-500 text-lg">No purchases recorded yet</p>
-            <p className="text-gray-400 text-sm">Add your first purchase order using the form above</p>
+            <p className="text-gray-500 text-lg">{t('purchases.noPurchasesRecorded')}</p>
+            <p className="text-gray-400 text-sm">{t('purchases.addFirstPurchase')}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Supplier</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Products</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Cost</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('purchases.supplier')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('purchases.products')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('purchases.totalCost')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('purchases.date')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('purchases.status')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('purchases.contact')}</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -302,7 +304,7 @@ const PurchasesPage = ({ showAddForm = false }) => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {purchase.items?.length || purchase.purchasedProducts?.length || 0} items
+                        {purchase.items?.length || purchase.purchasedProducts?.length || 0} {t('purchases.items')}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -321,7 +323,7 @@ const PurchasesPage = ({ showAddForm = false }) => {
                           ? 'bg-yellow-100 text-yellow-800'
                           : 'bg-gray-100 text-gray-800'
                       }`}>
-                        {purchase.status || 'Completed'}
+                        {purchase.status || t('purchases.completed')}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

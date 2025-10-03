@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import inventoryDataService from '../services/inventoryDataService';
 import apiClient from '../api';
 
@@ -14,25 +15,28 @@ export const LoadingSpinner = ({ title, subtitle }) => (
 );
 
 // Shared error component
-export const ErrorDisplay = ({ error, onRetry }) => (
-  <div className="min-h-screen bg-slate-50 flex justify-center items-center">
-    <div className="max-w-md mx-auto p-6">
-      <div className="bg-white p-8 rounded-lg shadow-lg border border-red-200 text-center">
-        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <div className="text-red-600 text-2xl font-bold">!</div>
+export const ErrorDisplay = ({ error, onRetry }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="min-h-screen bg-slate-50 flex justify-center items-center">
+      <div className="max-w-md mx-auto p-6">
+        <div className="bg-white p-8 rounded-lg shadow-lg border border-red-200 text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="text-red-600 text-2xl font-bold">!</div>
+          </div>
+          <h3 className="text-xl font-semibold text-slate-800 mb-2">{t('common.dataLoadError')}</h3>
+          <p className="text-red-600 mb-4">{error}</p>
+          <button 
+            onClick={onRetry}
+            className="px-6 py-3 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors font-medium"
+          >
+            {t('common.retryLoading')}
+          </button>
         </div>
-        <h3 className="text-xl font-semibold text-slate-800 mb-2">Data Load Error</h3>
-        <p className="text-red-600 mb-4">{error}</p>
-        <button 
-          onClick={onRetry}
-          className="px-6 py-3 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors font-medium"
-        >
-          Retry Loading
-        </button>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 // Shared message display component
 export const MessageDisplay = ({ message, onClose }) => {
@@ -68,46 +72,49 @@ export const MessageDisplay = ({ message, onClose }) => {
 };
 
 // Shared date range filter component
-export const DateRangeFilter = ({ dateRange, onChange, onExportSales, onExportInventory }) => (
-  <div className="bg-white/70 backdrop-blur-sm p-6 rounded-xl shadow-lg border border-white/30">
-    <div className="flex flex-wrap items-end gap-4">
-      <div className="flex-1 min-w-[200px]">
-        <label className="block text-sm font-semibold text-slate-700 mb-2">Start Date</label>
-        <input
-          type="date"
-          value={dateRange.startDate}
-          onChange={(e) => onChange('startDate', e.target.value)}
-          className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-        />
-      </div>
-      <div className="flex-1 min-w-[200px]">
-        <label className="block text-sm font-semibold text-slate-700 mb-2">End Date</label>
-        <input
-          type="date"
-          value={dateRange.endDate}
-          onChange={(e) => onChange('endDate', e.target.value)}
-          className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-        />
-      </div>
-      {onExportSales && onExportInventory && (
-        <div className="flex gap-3">
-          <button
-            onClick={onExportSales}
-            className="group flex items-center px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-700 text-white rounded-lg hover:from-emerald-700 hover:to-green-800 transition-all duration-300 shadow-lg hover:shadow-xl"
-          >
-            <span className="font-medium">Export Sales</span>
-          </button>
-          <button
-            onClick={onExportInventory}
-            className="group flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-lg hover:from-blue-700 hover:to-indigo-800 transition-all duration-300 shadow-lg hover:shadow-xl"
-          >
-            <span className="font-medium">Export Inventory</span>
-          </button>
+export const DateRangeFilter = ({ dateRange, onChange, onExportSales, onExportInventory }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="bg-white/70 backdrop-blur-sm p-6 rounded-xl shadow-lg border border-white/30">
+      <div className="flex flex-wrap items-end gap-4">
+        <div className="flex-1 min-w-[200px]">
+          <label className="block text-sm font-semibold text-slate-700 mb-2">{t('common.startDate')}</label>
+          <input
+            type="date"
+            value={dateRange.startDate}
+            onChange={(e) => onChange('startDate', e.target.value)}
+            className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+          />
         </div>
-      )}
+        <div className="flex-1 min-w-[200px]">
+          <label className="block text-sm font-semibold text-slate-700 mb-2">{t('common.endDate')}</label>
+          <input
+            type="date"
+            value={dateRange.endDate}
+            onChange={(e) => onChange('endDate', e.target.value)}
+            className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+          />
+        </div>
+        {onExportSales && onExportInventory && (
+          <div className="flex gap-3">
+            <button
+              onClick={onExportSales}
+              className="group flex items-center px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-700 text-white rounded-lg hover:from-emerald-700 hover:to-green-800 transition-all duration-300 shadow-lg hover:shadow-xl"
+            >
+              <span className="font-medium">{t('common.exportSales')}</span>
+            </button>
+            <button
+              onClick={onExportInventory}
+              className="group flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-lg hover:from-blue-700 hover:to-indigo-800 transition-all duration-300 shadow-lg hover:shadow-xl"
+            >
+              <span className="font-medium">{t('common.exportInventory')}</span>
+            </button>
+          </div>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 // Shared metric card component
 export const MetricCard = ({ title, value, subtitle, gradient, icon, color }) => (
@@ -132,9 +139,10 @@ export const MetricCard = ({ title, value, subtitle, gradient, icon, color }) =>
 
 // Shared CSV export functionality
 export const useCSVExport = () => {
+  const { t } = useTranslation();
   const exportToCSV = (data, filename) => {
     if (!data || data.length === 0) {
-      return { success: false, message: 'No data to export' };
+      return { success: false, message: t('common.noDataToExport') };
     }
 
     const headers = Object.keys(data[0]);
@@ -161,7 +169,7 @@ export const useCSVExport = () => {
     link.click();
     document.body.removeChild(link);
 
-    return { success: true, message: 'Data exported successfully!' };
+    return { success: true, message: t('common.dataExportedSuccessfully') };
   };
 
   const exportSalesData = async (dateRange) => {
@@ -172,7 +180,7 @@ export const useCSVExport = () => {
       return exportToCSV(response.data.data, 'sales-report');
     } catch (error) {
       console.error('Error exporting sales data:', error);
-      return { success: false, message: 'Failed to export sales data' };
+      return { success: false, message: t('common.failedToExportSalesData') };
     }
   };
 
@@ -182,7 +190,7 @@ export const useCSVExport = () => {
       return exportToCSV(response.data.data, 'inventory-report');
     } catch (error) {
       console.error('Error exporting inventory data:', error);
-      return { success: false, message: 'Failed to export inventory data' };
+      return { success: false, message: t('common.failedToExportInventoryData') };
     }
   };
 

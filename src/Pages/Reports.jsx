@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   SalesTrendChart, 
   TopProductsChart, 
@@ -17,6 +18,7 @@ import {
 } from '../Components/ReportsAnalyticsCommon';
 
 export default function Reports() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('overview');
   const [message, setMessage] = useState('');
   const [dateRange, setDateRange] = useState({
@@ -45,7 +47,7 @@ export default function Reports() {
 
   // Enhanced export functions using shared hook
   const handleExportSales = async () => {
-    setMessage('Exporting sales data...');
+    setMessage(t('reports.exportingSalesData'));
     const result = await exportSalesData(dateRange);
     setMessage(result.message);
     if (result.success) {
@@ -54,7 +56,7 @@ export default function Reports() {
   };
 
   const handleExportInventory = async () => {
-    setMessage('Exporting inventory data...');
+    setMessage(t('reports.exportingInventoryData'));
     const result = await exportInventoryData();
     setMessage(result.message);
     if (result.success) {
@@ -76,7 +78,7 @@ export default function Reports() {
           fetchLowStockAlerts()
         ]);
       } catch (err) {
-        setError(err.message || 'Failed to load reports data');
+        setError(err.message || t('reports.failedToLoadData'));
       } finally {
         setLoading(false);
       }
@@ -94,7 +96,7 @@ export default function Reports() {
   };
 
   if (loading) {
-    return <LoadingSpinner title="Loading Reports..." subtitle="Generating comprehensive business reports" />;
+    return <LoadingSpinner title={t('reports.loadingReports')} subtitle={t('reports.generatingReports')} />;
   }
 
   if (error) {
@@ -109,9 +111,9 @@ export default function Reports() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-slate-900 mb-2">
-                Business Reports
+                {t('reports.businessReports')}
               </h1>
-              <p className="text-slate-600">Comprehensive data insights and export capabilities</p>
+              <p className="text-slate-600">{t('reports.comprehensiveDataInsights')}</p>
             </div>
           </div>
         
@@ -132,10 +134,10 @@ export default function Reports() {
           <div className="border-b border-slate-200">
             <nav className="flex">
               {[
-                { id: 'overview', label: 'Overview' },
-                { id: 'sales', label: 'Sales Report' },
-                { id: 'inventory', label: 'Inventory Report' },
-                { id: 'alerts', label: 'Stock Alerts' }
+                { id: 'overview', label: t('reports.tabs.overview') },
+                { id: 'sales', label: t('reports.tabs.salesReport') },
+                { id: 'inventory', label: t('reports.tabs.inventoryReport') },
+                { id: 'alerts', label: t('reports.tabs.stockAlerts') }
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -163,33 +165,33 @@ export default function Reports() {
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <div className="bg-white p-6 rounded-lg shadow-md">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Total Sales</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('reports.metrics.totalSales')}</h3>
                   <p className="text-3xl font-bold text-blue-600">{dashboardMetrics.sales.totalSales}</p>
-                  <p className="text-sm text-gray-500">This period</p>
+                  <p className="text-sm text-gray-500">{t('reports.metrics.thisPeriod')}</p>
                 </div>
                 
                 <div className="bg-white p-6 rounded-lg shadow-md">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Total Revenue</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('reports.metrics.totalRevenue')}</h3>
                   <p className="text-3xl font-bold text-green-600">
                     ₹{dashboardMetrics.sales.totalRevenue.toLocaleString()}
                   </p>
-                  <p className="text-sm text-gray-500">This period</p>
+                  <p className="text-sm text-gray-500">{t('reports.metrics.thisPeriod')}</p>
                 </div>
                 
                 <div className="bg-white p-6 rounded-lg shadow-md">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Average Order Value</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('reports.metrics.averageOrderValue')}</h3>
                   <p className="text-3xl font-bold text-purple-600">
                     ₹{dashboardMetrics.sales.averageOrderValue.toFixed(2)}
                   </p>
-                  <p className="text-sm text-gray-500">Per transaction</p>
+                  <p className="text-sm text-gray-500">{t('reports.metrics.perTransaction')}</p>
                 </div>
                 
                 <div className="bg-white p-6 rounded-lg shadow-md">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Inventory Value</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('reports.metrics.inventoryValue')}</h3>
                   <p className="text-3xl font-bold text-orange-600">
                     ₹{dashboardMetrics.inventory.totalInventoryValue.toLocaleString()}
                   </p>
-                  <p className="text-sm text-gray-500">Current stock</p>
+                  <p className="text-sm text-gray-500">{t('reports.metrics.currentStock')}</p>
                 </div>
               </div>
 
@@ -199,7 +201,7 @@ export default function Reports() {
                 <div className="bg-white p-6 rounded-lg shadow-md">
                   <SalesTrendChart 
                     data={dashboardMetrics.monthlyRevenue} 
-                    title="Sales Trend Analysis"
+                    title={t('reports.charts.salesTrendAnalysis')}
                   />
                 </div>
                 
@@ -207,7 +209,7 @@ export default function Reports() {
                 <div className="bg-white p-6 rounded-lg shadow-md">
                   <InventoryStatusChart 
                     data={dashboardMetrics.inventory} 
-                    title="Stock Status Distribution"
+                    title={t('reports.charts.stockStatusDistribution')}
                   />
                 </div>
               </div>
@@ -218,13 +220,13 @@ export default function Reports() {
                 <div className="bg-white p-6 rounded-lg shadow-md">
                   <TopProductsChart 
                     data={dashboardMetrics.topProducts} 
-                    title="Best Performing Products"
+                    title={t('reports.charts.bestPerformingProducts')}
                   />
                 </div>
                 
                 {/* Top Products List */}
                 <div className="bg-white p-6 rounded-lg shadow-md">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Products Details</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('reports.topProductsDetails')}</h3>
                   <div className="space-y-3">
                     {dashboardMetrics.topProducts.slice(0, 5).map((product, index) => (
                       <div key={product._id} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
@@ -238,10 +240,10 @@ export default function Reports() {
                           </span>
                           <div>
                             <span className="text-gray-900 font-medium truncate">{product.productName}</span>
-                            <p className="text-xs text-gray-500">₹{product.totalRevenue.toLocaleString()} revenue</p>
+                            <p className="text-xs text-gray-500">₹{product.totalRevenue.toLocaleString()} {t('reports.revenue')}</p>
                           </div>
                         </div>
-                        <span className="font-semibold text-blue-600">{product.totalQuantity} sold</span>
+                        <span className="font-semibold text-blue-600">{product.totalQuantity} {t('reports.sold')}</span>
                       </div>
                     ))}
                   </div>
@@ -255,7 +257,7 @@ export default function Reports() {
       {activeTab === 'sales' && (
         <div className="bg-white rounded-lg shadow-md">
           <div className="p-6 border-b">
-            <h3 className="text-lg font-semibold text-gray-900">Sales Report</h3>
+            <h3 className="text-lg font-semibold text-gray-900">{t('reports.tabs.salesReport')}</h3>
             <p className="text-sm text-gray-500">
               {new Date(dateRange.startDate).toLocaleDateString()} - {new Date(dateRange.endDate).toLocaleDateString()}
             </p>
@@ -264,11 +266,11 @@ export default function Reports() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Items</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Amount</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sold By</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Method</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('reports.table.date')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('reports.table.items')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('reports.table.totalAmount')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('reports.table.soldBy')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('reports.table.paymentMethod')}</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -278,22 +280,22 @@ export default function Reports() {
                       {new Date(sale.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900">
-                      {sale.items?.length || 0} items
+                      {sale.items?.length || 0} {t('reports.items')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       ₹{sale.totalAmount?.toLocaleString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {sale.soldBy?.name || 'N/A'}
+                      {sale.soldBy?.name || t('reports.na')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {sale.paymentMethod || 'Cash'}
+                      {sale.paymentMethod || t('reports.cash')}
                     </td>
                   </tr>
                 )) || (
                   <tr>
                     <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
-                      No sales data found for this period
+                      {t('reports.noSalesData')}
                     </td>
                   </tr>
                 )}
@@ -307,21 +309,21 @@ export default function Reports() {
         <div className="bg-white rounded-lg shadow-md">
           <div className="p-6 border-b flex justify-between items-center">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Inventory Report</h3>
-              <p className="text-sm text-gray-500">Current stock levels and valuations</p>
+              <h3 className="text-lg font-semibold text-gray-900">{t('reports.tabs.inventoryReport')}</h3>
+              <p className="text-sm text-gray-500">{t('reports.currentStockLevels')}</p>
             </div>
             <div className="flex gap-2">
               <button
                 onClick={() => fetchInventoryReport(1, false)}
                 className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
               >
-                All Items
+                {t('reports.allItems')}
               </button>
               <button
                 onClick={() => fetchInventoryReport(1, true)}
                 className="px-3 py-1 text-sm bg-yellow-600 text-white rounded-md hover:bg-yellow-700"
               >
-                Low Stock Only
+                {t('reports.lowStockOnly')}
               </button>
             </div>
           </div>
@@ -329,11 +331,11 @@ export default function Reports() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Value</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('reports.table.product')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('reports.table.category')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('reports.table.stock')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('reports.table.status')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('reports.table.value')}</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -346,7 +348,7 @@ export default function Reports() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {product.category?.name || 'Uncategorized'}
+                      {product.category?.name || t('reports.uncategorized')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {product.stock}
@@ -369,7 +371,7 @@ export default function Reports() {
                 )) || (
                   <tr>
                     <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
-                      No inventory data found
+                      {t('reports.noInventoryData')}
                     </td>
                   </tr>
                 )}
@@ -382,8 +384,8 @@ export default function Reports() {
       {activeTab === 'alerts' && (
         <div className="bg-white rounded-lg shadow-md">
           <div className="p-6 border-b">
-            <h3 className="text-lg font-semibold text-gray-900">Stock Alerts</h3>
-            <p className="text-sm text-gray-500">Products requiring attention</p>
+            <h3 className="text-lg font-semibold text-gray-900">{t('reports.tabs.stockAlerts')}</h3>
+            <p className="text-sm text-gray-500">{t('reports.productsRequiringAttention')}</p>
           </div>
           <div className="p-6">
             {lowStockAlerts.length === 0 ? (
@@ -391,8 +393,8 @@ export default function Reports() {
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <div className="text-green-600 text-2xl font-bold">OK</div>
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">All Good!</h3>
-                <p className="text-gray-500">No stock alerts at this time.</p>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">{t('reports.allGood')}</h3>
+                <p className="text-gray-500">{t('reports.noStockAlerts')}</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -407,16 +409,16 @@ export default function Reports() {
                     <div className="flex justify-between items-start">
                       <div>
                         <h4 className="font-medium text-gray-900">{product.name}</h4>
-                        {product.brand && <p className="text-sm text-gray-600">Brand: {product.brand}</p>}
-                        <p className="text-sm text-gray-600">Category: {product.category?.name || 'Uncategorized'}</p>
+                        {product.brand && <p className="text-sm text-gray-600">{t('reports.brand')}: {product.brand}</p>}
+                        <p className="text-sm text-gray-600">{t('reports.category')}: {product.category?.name || t('reports.uncategorized')}</p>
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-medium">
-                          Stock: <span className={product.stock === 0 ? 'text-red-600' : 'text-orange-600'}>
+                          {t('reports.stock')}: <span className={product.stock === 0 ? 'text-red-600' : 'text-orange-600'}>
                             {product.stock}
                           </span>
                         </p>
-                        <p className="text-xs text-gray-500">Threshold: {product.lowStockThreshold}</p>
+                        <p className="text-xs text-gray-500">{t('reports.threshold')}: {product.lowStockThreshold}</p>
                       </div>
                     </div>
                     <div className="mt-2">
@@ -427,7 +429,7 @@ export default function Reports() {
                           ? 'bg-orange-100 text-orange-800'
                           : 'bg-yellow-100 text-yellow-800'
                       }`}>
-                        {product.stockStatus} - {product.urgency.toUpperCase()} PRIORITY
+                        {product.stockStatus} - {product.urgency.toUpperCase()} {t('reports.priority')}
                       </span>
                     </div>
                   </div>

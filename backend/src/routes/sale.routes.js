@@ -6,6 +6,7 @@ import {
     generateInvoice,
     getSalesStats,
     refundSale,
+    getNextInvoiceNumber,
 } from "../controllers/sale.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -24,5 +25,8 @@ router.route("/:id/invoice")
 
 router.route("/stats/daily")
     .get(verifyJWT, getSalesStats); // Admin only
+
+router.route("/next-invoice-number")
+    .get(verifyJWT, getNextInvoiceNumber); // Admin/Sub-admin
 
 export default router;

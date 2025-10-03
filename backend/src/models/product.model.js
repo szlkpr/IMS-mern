@@ -6,7 +6,7 @@ const productSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
-        unique: true,
+        // Note: unique constraint removed to allow duplicate product names
     },
     description: {
         type: String,
@@ -91,5 +91,10 @@ productSchema.pre("save", function (next) {
 });
 
 productSchema.plugin(mongooseAggregatePaginate);
+
+// Clear any existing model cache
+if (mongoose.models.Product) {
+    delete mongoose.models.Product;
+}
 
 export const Product = mongoose.model("Product", productSchema);

@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import apiClient from '../api';
 
 export default function Profile() {
+  const { t } = useTranslation();
   const [user, setUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -39,7 +41,7 @@ export default function Profile() {
       setLoading(false);
     } catch (error) {
       console.error('Error fetching user profile:', error);
-      setMessage('Failed to load user profile');
+      setMessage(t('profile.errors.fetchFailed'));
       setLoading(false);
     }
   };
@@ -50,18 +52,18 @@ export default function Profile() {
       const response = await apiClient.patch('/users/profile', profileForm);
       setUser(response.data.data);
       setIsEditing(false);
-      setMessage('Profile updated successfully!');
+      setMessage(t('profile.messages.updateSuccess'));
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
       console.error('Error updating profile:', error);
-      setMessage(error.response?.data?.message || 'Failed to update profile');
+      setMessage(error.response?.data?.message || t('profile.errors.updateFailed'));
     }
   };
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     if (passwordForm.newPassword !== passwordForm.confPassword) {
-      setMessage('New passwords do not match');
+      setMessage(t('profile.errors.passwordMismatch'));
       return;
     }
 
@@ -69,18 +71,18 @@ export default function Profile() {
       await apiClient.post('/users/change-password', passwordForm);
       setIsChangingPassword(false);
       setPasswordForm({ oldPassword: '', newPassword: '', confPassword: '' });
-      setMessage('Password changed successfully!');
+      setMessage(t('profile.messages.passwordChangeSuccess'));
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
       console.error('Error changing password:', error);
-      setMessage(error.response?.data?.message || 'Failed to change password');
+      setMessage(error.response?.data?.message || t('profile.errors.passwordChangeFailed'));
     }
   };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="text-lg">Loading profile...</div>
+        <div className="text-lg">{t('profile.loading')}</div>
       </div>
     );
   }
@@ -89,19 +91,19 @@ export default function Profile() {
     <div className="max-w-4xl mx-auto p-6">
       <div className="bg-white shadow-md rounded-lg p-6">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">User Profile</h1>
+          <h1 className="text-2xl font-bold text-gray-800">{t('profile.title')}</h1>
           <div className="flex gap-2">
             <button
               onClick={() => setIsEditing(!isEditing)}
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
             >
-              {isEditing ? 'Cancel' : 'Edit Profile'}
+              {isEditing ? t('profile.buttons.cancel') : t('profile.buttons.editProfile')}
             </button>
             <button
               onClick={() => setIsChangingPassword(!isChangingPassword)}
               className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
             >
-              Change Password
+              {t('profile.buttons.changePassword')}
             </button>
           </div>
         </div>
@@ -119,13 +121,13 @@ export default function Profile() {
         {/* Profile Information Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <h2 className="text-lg font-semibold mb-4">Profile Information</h2>
+            <h2 className="text-lg font-semibold mb-4">{t('profile.sections.profileInfo')}</h2>
             
             {isEditing ? (
               <form onSubmit={handleProfileUpdate} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Full Name
+                    {t('profile.fields.fullName')}
                   </label>
                   <input
                     type="text"
@@ -138,7 +140,7 @@ export default function Profile() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Email Address
+                    {t('profile.fields.email')}
                   </label>
                   <input
                     type="email"
@@ -151,14 +153,14 @@ export default function Profile() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Phone Number
+                    {t('profile.fields.phone')}
                   </label>
                   <input
                     type="tel"
                     value={profileForm.phone}
                     onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Optional"
+                    placeholder={t('profile.placeholders.optional')}
                   />
                 </div>
 
@@ -167,7 +169,7 @@ export default function Profile() {
                     type="submit"
                     className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                   >
-                    Save Changes
+                    {t('profile.buttons.saveChanges')}
                   </button>
                   <button
                     type="button"
@@ -181,29 +183,29 @@ export default function Profile() {
                     }}
                     className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors"
                   >
-                    Cancel
+                    {t('profile.buttons.cancel')}
                   </button>
                 </div>
               </form>
             ) : (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-600">Full Name</label>
-                  <p className="text-lg text-gray-800">{user?.name || 'N/A'}</p>
+                  <label className="block text-sm font-medium text-gray-600">{t('profile.fields.fullName')}</label>
+                  <p className="text-lg text-gray-800">{user?.name || t('profile.values.na')}</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-600">Email Address</label>
-                  <p className="text-lg text-gray-800">{user?.email || 'N/A'}</p>
+                  <label className="block text-sm font-medium text-gray-600">{t('profile.fields.email')}</label>
+                  <p className="text-lg text-gray-800">{user?.email || t('profile.values.na')}</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-600">Phone Number</label>
-                  <p className="text-lg text-gray-800">{user?.phone || 'Not provided'}</p>
+                  <label className="block text-sm font-medium text-gray-600">{t('profile.fields.phone')}</label>
+                  <p className="text-lg text-gray-800">{user?.phone || t('profile.values.notProvided')}</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-600">Role</label>
+                  <label className="block text-sm font-medium text-gray-600">{t('profile.fields.role')}</label>
                   <span className={`inline-block px-2 py-1 text-xs font-semibold rounded-full ${
                     user?.role === 'admin' 
                       ? 'bg-red-100 text-red-800' 
@@ -214,9 +216,9 @@ export default function Profile() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-600">Member Since</label>
+                  <label className="block text-sm font-medium text-gray-600">{t('profile.fields.memberSince')}</label>
                   <p className="text-lg text-gray-800">
-                    {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+                    {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : t('profile.values.na')}
                   </p>
                 </div>
               </div>
@@ -225,13 +227,13 @@ export default function Profile() {
 
           {/* Password Change Section */}
           <div>
-            <h2 className="text-lg font-semibold mb-4">Security Settings</h2>
+            <h2 className="text-lg font-semibold mb-4">{t('profile.sections.securitySettings')}</h2>
             
             {isChangingPassword ? (
               <form onSubmit={handlePasswordChange} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Current Password
+                    {t('profile.fields.currentPassword')}
                   </label>
                   <input
                     type="password"
@@ -244,7 +246,7 @@ export default function Profile() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    New Password
+                    {t('profile.fields.newPassword')}
                   </label>
                   <input
                     type="password"
@@ -258,7 +260,7 @@ export default function Profile() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Confirm New Password
+                    {t('profile.fields.confirmPassword')}
                   </label>
                   <input
                     type="password"
@@ -275,7 +277,7 @@ export default function Profile() {
                     type="submit"
                     className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
                   >
-                    Change Password
+                    {t('profile.buttons.changePassword')}
                   </button>
                   <button
                     type="button"
@@ -285,25 +287,25 @@ export default function Profile() {
                     }}
                     className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors"
                   >
-                    Cancel
+                    {t('profile.buttons.cancel')}
                   </button>
                 </div>
               </form>
             ) : (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-600">Password</label>
+                  <label className="block text-sm font-medium text-gray-600">{t('profile.fields.password')}</label>
                   <p className="text-lg text-gray-800">••••••••••••</p>
                   <p className="text-sm text-gray-500 mt-1">
-                    Last changed: {user?.updatedAt ? new Date(user.updatedAt).toLocaleDateString() : 'Unknown'}
+                    {t('profile.labels.lastChanged')}: {user?.updatedAt ? new Date(user.updatedAt).toLocaleDateString() : t('profile.values.unknown')}
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-600">Account Security</label>
+                  <label className="block text-sm font-medium text-gray-600">{t('profile.fields.accountSecurity')}</label>
                   <div className="flex items-center mt-1">
                     <div className="w-3 h-3 bg-green-400 rounded-full mr-2"></div>
-                    <span className="text-sm text-gray-700">Account is secure</span>
+                    <span className="text-sm text-gray-700">{t('profile.labels.accountSecure')}</span>
                   </div>
                 </div>
               </div>
@@ -313,17 +315,17 @@ export default function Profile() {
 
         {/* Avatar Section */}
         <div className="mt-8 pt-6 border-t border-gray-200">
-          <h2 className="text-lg font-semibold mb-4">Profile Picture</h2>
+          <h2 className="text-lg font-semibold mb-4">{t('profile.sections.profilePicture')}</h2>
           <div className="flex items-center gap-4">
             <img
               src={user?.avatar || "https://www.gravatar.com/avatar/?d=mp"}
-              alt="Profile"
+              alt={t('profile.alt.profileImage')}
               className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
             />
             <div>
-              <p className="text-sm text-gray-600">Change your profile picture</p>
+              <p className="text-sm text-gray-600">{t('profile.labels.changePicture')}</p>
               <button className="mt-1 px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors">
-                Upload New Photo
+                {t('profile.buttons.uploadPhoto')}
               </button>
             </div>
           </div>
