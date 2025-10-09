@@ -113,22 +113,22 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="max-w-7xl mx-auto p-6 space-y-6">
+    <div className="min-h-screen">
+      <div className="max-w-7xl mx-auto p-6 space-y-8">
         {/* Header Section */}
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <div className="bg-white p-6 shadow-sm border border-corporate-200">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900 mb-2">
+              <h1 className="text-3xl font-bold text-corporate-700 mb-2">
                 {t('dashboard.title')}
               </h1>
-              <p className="text-slate-600">{t('dashboard.subtitle')}</p>
-              <div className="flex items-center mt-3 space-x-4">
-                <div className="flex items-center text-sm text-emerald-600">
-                  <div className="w-2 h-2 bg-emerald-500 rounded-full mr-2"></div>
+              <p className="text-corporate-500 text-base">{t('dashboard.subtitle')}</p>
+              <div className="flex items-center mt-4 space-x-4">
+                <div className="flex items-center text-sm text-success bg-green-50 px-3 py-1 sharp-sm">
+                  <div className="w-2 h-2 bg-success mr-2"></div>
                   {t('dashboard.systemOnline')}
                 </div>
-                <div className="text-sm text-slate-500">
+                <div className="text-sm text-corporate-500 bg-corporate-50 px-3 py-1 sharp-sm">
                   {t('dashboard.lastUpdated')}: {new Date().toLocaleTimeString()}
                 </div>
               </div>
@@ -142,54 +142,54 @@ export default function Dashboard() {
           <>
             {/* Top Row - KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl shadow-sm border border-blue-200 hover:shadow-md transition-all duration-200">
+              <div className="group bg-white p-6 shadow-sm border border-corporate-200 hover:shadow-md transition-all duration-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-blue-700 mb-2">{t('dashboard.totalSales')}</p>
-                    <p className="text-3xl font-bold text-blue-900">{metrics.sales.totalSales}</p>
-                    <p className="text-xs text-blue-600 mt-1">{t('dashboard.thisMonth')}</p>
+                    <p className="text-sm font-medium text-corporate-600 mb-2">{t('dashboard.totalSales')}</p>
+                    <p className="text-3xl font-bold text-corporate-700">{metrics.sales.totalSales}</p>
+                    <p className="text-xs text-corporate-500 mt-1">{t('dashboard.thisMonth')}</p>
                   </div>
-                  <div className="w-14 h-14 bg-blue-500 rounded-xl flex items-center justify-center shadow-lg">
-                    <div className="text-white text-xl">💰</div>
+                  <div className="w-12 h-12 bg-corporate-gradient flex items-center justify-center shadow-sm">
+                    <div className="text-white text-lg">💰</div>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 rounded-xl shadow-sm border border-emerald-200 hover:shadow-md transition-all duration-200">
+              <div className="group bg-white p-6 shadow-sm border border-corporate-200 hover:shadow-md transition-all duration-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-emerald-700 mb-2">{t('dashboard.revenue')}</p>
-                    <p className="text-3xl font-bold text-emerald-900">₹{(metrics.sales.totalRevenue / 1000).toFixed(0)}K</p>
-                    <p className="text-xs text-emerald-600 mt-1">{t('dashboard.thisMonth')}</p>
+                    <p className="text-sm font-medium text-success mb-2">{t('dashboard.revenue')}</p>
+                    <p className="text-3xl font-bold text-corporate-700">₹{(metrics.sales.totalRevenue / 1000).toFixed(0)}K</p>
+                    <p className="text-xs text-corporate-500 mt-1">{t('dashboard.thisMonth')}</p>
                   </div>
-                  <div className="w-14 h-14 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg">
-                    <div className="text-white text-xl">📈</div>
+                  <div className="w-12 h-12 bg-green-600 flex items-center justify-center shadow-sm">
+                    <div className="text-white text-lg">📈</div>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl shadow-sm border border-purple-200 hover:shadow-md transition-all duration-200">
+              <div className="group bg-white p-6 shadow-sm border border-corporate-200 hover:shadow-md transition-all duration-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-purple-700 mb-2">{t('dashboard.products')}</p>
-                    <p className="text-3xl font-bold text-purple-900">{metrics.inventory.totalProducts}</p>
-                    <p className="text-xs text-purple-600 mt-1">{t('dashboard.inInventory')}</p>
+                    <p className="text-sm font-medium text-warning mb-2">{t('dashboard.products')}</p>
+                    <p className="text-3xl font-bold text-corporate-700">{metrics.inventory.totalProducts}</p>
+                    <p className="text-xs text-corporate-500 mt-1">{t('dashboard.inInventory')}</p>
                   </div>
-                  <div className="w-14 h-14 bg-purple-500 rounded-xl flex items-center justify-center shadow-lg">
-                    <div className="text-white text-xl">📦</div>
+                  <div className="w-12 h-12 bg-yellow-600 flex items-center justify-center shadow-sm">
+                    <div className="text-white text-lg">📦</div>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-amber-50 to-amber-100 p-6 rounded-xl shadow-sm border border-amber-200 hover:shadow-md transition-all duration-200">
+              <div className="group bg-white p-6 shadow-sm border border-corporate-200 hover:shadow-md transition-all duration-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-amber-700 mb-2">{t('dashboard.lowStock')}</p>
-                    <p className="text-3xl font-bold text-amber-900">{metrics.inventory.lowStockItems}</p>
-                    <p className="text-xs text-amber-600 mt-1">{t('dashboard.needAttention')}</p>
+                    <p className="text-sm font-medium text-danger mb-2">{t('dashboard.lowStock')}</p>
+                    <p className="text-3xl font-bold text-corporate-700">{metrics.inventory.lowStockItems}</p>
+                    <p className="text-xs text-corporate-500 mt-1">{t('dashboard.needAttention')}</p>
                   </div>
-                  <div className="w-14 h-14 bg-amber-500 rounded-xl flex items-center justify-center shadow-lg">
-                    <div className="text-white text-xl">⚠️</div>
+                  <div className="w-12 h-12 bg-red-600 flex items-center justify-center shadow-sm">
+                    <div className="text-white text-lg">⚠️</div>
                   </div>
                 </div>
               </div>

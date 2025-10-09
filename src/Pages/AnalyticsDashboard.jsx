@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import inventoryDataService from '../services/inventoryDataService';
+import apiClient from '../api';
 import { 
   SalesTrendChart, 
   TopProductsChart, 
@@ -15,6 +16,34 @@ import {
   LoadingSpinner,
   ErrorDisplay
 } from '../Components/ReportsAnalyticsCommon';
+import { Line, Bar, Doughnut } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+} from 'chart.js';
+
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
 
 const AnalyticsDashboard = () => {
   const { t } = useTranslation();
@@ -32,6 +61,41 @@ const AnalyticsDashboard = () => {
   const [hourlySales, setHourlySales] = useState([]);
   const [revenueData, setRevenueData] = useState([]);
   const [kpis, setKpis] = useState({});
+
+  // ML Analytics state
+  const [mlDashboardData, setMlDashboardData] = useState(null);
+  const [mlServiceStatus, setMlServiceStatus] = useState('unknown');
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [predictionsData, setPredictionsData] = useState(null);
+
+  // Fetch ML Analytics data
+  const fetchMLData = async () => {
+    try {
+      // Check ML service health
+      const healthResponse = await apiClient.get('/ml/health');
+      setMlServiceStatus(healthResponse.data.ml_service_connected ? 'active' : 'inactive');
+
+      // Fetch ML dashboard summary
+      const dashboardResponse = await apiClient.get('/ml/dashboard/summary');
+      setMlDashboardData(dashboardResponse.data.data);
+    } catch (err) {
+      console.error('Error fetching ML data:', err);
+      setMlServiceStatus('error');
+    }
+  };
+
+  // Fetch product prediction
+  const fetchProductPrediction = async (productId) => {
+    try {
+      const response = await apiClient.post(`/ml/predict/demand/${productId}`, {
+        forecastHorizon: 30,
+        includeScenarios: true
+      });
+      setPredictionsData(response.data.data);
+    } catch (err) {
+      console.error('Prediction error:', err);
+    }
+  };
 
   // Fetch all analytics data using centralized service
   const fetchAnalyticsData = async () => {
@@ -59,6 +123,8 @@ const AnalyticsDashboard = () => {
       setHourlySales(analyticsData.hourlySales || []);
       setRevenueData(analyticsData.revenueData || []);
       
+      // Fetch ML data
+      await fetchMLData();
       
     } catch (err) {
       console.error('Error fetching analytics data:', err);
@@ -184,6 +250,286 @@ const AnalyticsDashboard = () => {
             </div>
             <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-400 to-amber-300 rounded-b-2xl"></div>
           </div>
+        </div>
+
+        {/* ML Analytics Section */}
+        <div className="bg-white/90 backdrop-blur-sm p-8 rounded-2xl shadow-xl border border-white/30">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-indigo-700 rounded-xl flex items-center justify-center text-white mr-4 text-lg font-bold">
+                ML
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-slate-800">AI-Powered Analytics</h2>
+                <p className="text-slate-600">Machine Learning Insights & Predictions</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-4">
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                mlServiceStatus === 'active' 
+                  ? 'bg-green-100 text-green-800' 
+                  : mlServiceStatus === 'inactive'
+                  ? 'bg-yellow-100 text-yellow-800'
+                  : 'bg-red-100 text-red-800'
+              }`}>
+                ML Service: {mlServiceStatus}
+              </span>
+            </div>
+          </div>
+
+          {/* ML Summary Cards */}
+          {mlDashboardData && (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              <div className="bg-white rounded-lg shadow p-6">
+                <div className="flex items-center">
+                  <div className="p-2 bg-blue-100 rounded-md">
+                    <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-500">Products Analyzed</p>
+                    <p className="text-2xl font-semibold text-gray-900">{mlDashboardData.summary?.total_products_analyzed || 0}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg shadow p-6">
+                <div className="flex items-center">
+                  <div className="p-2 bg-green-100 rounded-md">
+                    <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-500">Successful Predictions</p>
+                    <p className="text-2xl font-semibold text-gray-900">{mlDashboardData.summary?.successful_predictions || 0}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg shadow p-6">
+                <div className="flex items-center">
+                  <div className="p-2 bg-red-100 rounded-md">
+                    <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L5.5 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-500">High Risk Products</p>
+                    <p className="text-2xl font-semibold text-gray-900">{mlDashboardData.summary?.high_risk_products || 0}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg shadow p-6">
+                <div className="flex items-center">
+                  <div className="p-2 bg-purple-100 rounded-md">
+                    <svg className="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                    </svg>
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-500">Trending Products</p>
+                    <p className="text-2xl font-semibold text-gray-900">{mlDashboardData.summary?.trending_products?.length || 0}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ML Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Product Trends Chart */}
+            <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Product Trends & Confidence</h3>
+              {mlDashboardData?.summary?.trending_products && mlDashboardData.summary.trending_products.length > 0 ? (
+                <Bar 
+                  data={{
+                    labels: mlDashboardData.summary.trending_products.map(p => p.name),
+                    datasets: [{
+                      label: 'Confidence Score',
+                      data: mlDashboardData.summary.trending_products.map(p => (p.confidence * 100).toFixed(1)),
+                      backgroundColor: mlDashboardData.summary.trending_products.map(p => 
+                        p.trend === 'increasing' ? 'rgba(34, 197, 94, 0.8)' : 'rgba(239, 68, 68, 0.8)'
+                      ),
+                      borderColor: mlDashboardData.summary.trending_products.map(p => 
+                        p.trend === 'increasing' ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)'
+                      ),
+                      borderWidth: 1,
+                    }],
+                  }}
+                  options={{
+                    responsive: true,
+                    plugins: {
+                      legend: { position: 'top' },
+                      title: { display: true, text: 'Prediction Confidence' }
+                    }
+                  }}
+                />
+              ) : (
+                <div className="flex items-center justify-center h-64 text-gray-500">
+                  No trending products data available
+                </div>
+              )}
+            </div>
+
+            {/* Demand Forecast Chart */}
+            <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Demand Forecast</h3>
+                <select
+                  className="border border-gray-300 rounded-md px-3 py-1 text-sm"
+                  onChange={(e) => {
+                    setSelectedProduct(e.target.value);
+                    if (e.target.value) {
+                      fetchProductPrediction(e.target.value);
+                    }
+                  }}
+                  value={selectedProduct || ''}
+                >
+                  <option value="">Select Product</option>
+                  {mlDashboardData?.summary?.trending_products?.map((product) => (
+                    <option key={product.id} value={product.id}>
+                      {product.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {predictionsData ? (
+                <Line 
+                  data={{
+                    labels: Array.from({length: predictionsData.forecast_horizon}, (_, i) => `Day ${i + 1}`),
+                    datasets: [
+                      {
+                        label: 'Predicted Demand',
+                        data: predictionsData.predictions,
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                      },
+                      {
+                        label: 'Lower Bound',
+                        data: predictionsData.confidence_intervals?.lower || [],
+                        borderColor: 'rgba(239, 68, 68, 0.5)',
+                        backgroundColor: 'transparent',
+                        borderDash: [5, 5],
+                        tension: 0.4,
+                        pointRadius: 0,
+                      },
+                      {
+                        label: 'Upper Bound',
+                        data: predictionsData.confidence_intervals?.upper || [],
+                        borderColor: 'rgba(34, 197, 94, 0.5)',
+                        backgroundColor: 'transparent',
+                        borderDash: [5, 5],
+                        tension: 0.4,
+                        pointRadius: 0,
+                      },
+                    ],
+                  }}
+                  options={{
+                    responsive: true,
+                    plugins: {
+                      legend: { position: 'top' },
+                      title: { display: true, text: 'Demand Forecast' }
+                    },
+                    scales: {
+                      y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Demand Units' }
+                      },
+                      x: {
+                        title: { display: true, text: 'Days' }
+                      }
+                    }
+                  }}
+                />
+              ) : (
+                <div className="flex items-center justify-center h-64 text-gray-500">
+                  Select a product to view demand forecast
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* ML Recommendations */}
+          {mlDashboardData?.summary?.recommendations && mlDashboardData.summary.recommendations.length > 0 && (
+            <div className="mt-8 bg-slate-50 p-6 rounded-xl border border-slate-200">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">AI Recommendations</h3>
+              <div className="space-y-2">
+                {mlDashboardData.summary.recommendations.map((recommendation, index) => (
+                  <div key={index} className="flex items-start">
+                    <div className="p-1 bg-blue-100 rounded-full mr-3 mt-1">
+                      <svg className="h-3 w-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <p className="text-sm text-gray-700">{recommendation}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Prediction Details */}
+          {predictionsData && (
+            <div className="mt-8 bg-slate-50 p-6 rounded-xl border border-slate-200">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Prediction Details</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Certainty Score</h4>
+                  <div className="mt-2">
+                    <div className="bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-blue-600 h-2 rounded-full"
+                        style={{ width: `${(predictionsData.certainty_score * 100)}%` }}
+                      ></div>
+                    </div>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {(predictionsData.certainty_score * 100).toFixed(1)}% confidence
+                    </p>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Method</h4>
+                  <p className="mt-2 text-sm font-medium text-gray-900 capitalize">
+                    {predictionsData.method?.replace(/_/g, ' ') || 'Unknown'}
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Generated At</h4>
+                  <p className="mt-2 text-sm font-medium text-gray-900">
+                    {new Date(predictionsData.generated_at).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+
+              {predictionsData.narrative && (
+                <div className="mt-6">
+                  <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Analysis</h4>
+                  <p className="mt-2 text-gray-700">{predictionsData.narrative}</p>
+                </div>
+              )}
+
+              {predictionsData.recommendations && predictionsData.recommendations.length > 0 && (
+                <div className="mt-6">
+                  <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Recommendations</h4>
+                  <ul className="mt-2 space-y-1">
+                    {predictionsData.recommendations.map((rec, index) => (
+                      <li key={index} className="text-sm text-gray-700 flex items-start">
+                        <span className="text-blue-600 mr-2">•</span>
+                        {rec}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Enhanced Sales Analytics */}

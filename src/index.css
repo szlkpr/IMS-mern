@@ -28,3 +28,293 @@ body {
 * {
   transition: font-family 0.2s ease-in-out;
 }
+
+/* Smart Rust Theme with Strategic Colors */
+:root {
+  /* Core palette */
+  --dark-rust: #7a2e1c;     /* Dark Rusty Red */
+  --rust: #c04b2a;          /* Rusty Red */
+  --off-white: #f8f3ee;     /* Off-white */
+  
+  /* Smart complementary colors for different use cases */
+  --warm-gray: #8b7355;     /* Warm brown-gray for secondary text */
+  --soft-cream: #f5f1eb;    /* Soft cream for card backgrounds */
+  --charcoal: #3a342e;      /* Charcoal for primary text */
+  --sage-green: #6b7c32;    /* Sage green for success/positive */
+  --burnt-orange: #d2691e;  /* Burnt orange for warnings */
+  --deep-burgundy: #8b1538; /* Deep burgundy for errors */
+  --steel-blue: #4a6fa5;    /* Steel blue for info/links */
+}
+
+/* Global base theming with smart colors */
+body {
+  background-color: var(--off-white);
+  color: var(--charcoal);
+}
+
+/* Smart color assignments for different UI elements */
+@layer base {
+  /* Primary buttons - Rust theme */
+  .btn-primary, button.btn-primary, [data-variant="primary"] {
+    border-radius: 2px;
+    background: linear-gradient(135deg, var(--rust) 0%, var(--dark-rust) 100%);
+    color: #fff;
+    border: 1px solid rgba(122, 46, 28, 0.35);
+  }
+  
+  /* Secondary buttons - Steel blue for variety */
+  .btn-secondary, [data-variant="secondary"] {
+    border-radius: 2px;
+    background: var(--steel-blue);
+    color: #fff;
+    border: 1px solid rgba(74, 111, 165, 0.3);
+  }
+  
+  /* Success buttons - Sage green */
+  .btn-success, [data-variant="success"] {
+    border-radius: 2px;
+    background: var(--sage-green);
+    color: #fff;
+    border: 1px solid rgba(107, 124, 50, 0.3);
+  }
+  
+  /* Warning buttons - Burnt orange */
+  .btn-warning, [data-variant="warning"] {
+    border-radius: 2px;
+    background: var(--burnt-orange);
+    color: #fff;
+    border: 1px solid rgba(210, 105, 30, 0.3);
+  }
+  
+  /* Danger buttons - Deep burgundy */
+  .btn-danger, [data-variant="danger"] {
+    border-radius: 2px;
+    background: var(--deep-burgundy);
+    color: #fff;
+    border: 1px solid rgba(139, 21, 56, 0.3);
+  }
+  
+  /* Inputs with smart styling */
+  input, select, textarea {
+    border-radius: 2px;
+    background-color: #fff;
+    border: 1px solid rgba(139, 115, 85, 0.2);
+    color: var(--charcoal);
+  }
+  
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--rust);
+    box-shadow: 0 0 0 2px rgba(192, 75, 42, 0.2);
+  }
+}
+
+/* Remove aggressive global gradient/text/background overrides to restore readability */
+
+/* Professional Design System */
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.4s ease-out;
+  }
+  
+  .glass-effect {
+    background: rgba(248, 249, 250, 0.95);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(108, 117, 125, 0.2);
+  }
+  
+  .gradient-text {
+    background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .hover-lift {
+    transition: all 0.2s ease-in-out;
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Professional Theme Utilities */
+  .bg-corporate-gradient {
+    background: linear-gradient(135deg, var(--dark-rust) 0%, var(--rust) 100%);
+  }
+  
+  .bg-accent-gradient {
+    background: linear-gradient(135deg, var(--rust) 0%, var(--dark-rust) 100%);
+  }
+  
+  .text-corporate {
+    color: var(--dark-rust);
+  }
+  
+  .text-corporate-light {
+    color: var(--rust);
+  }
+  
+  .border-corporate {
+    border-color: rgba(122, 46, 28, 0.2);
+  }
+  
+  .ring-corporate {
+    --tw-ring-color: var(--rust);
+  }
+  
+  /* Sharp corners for professional look */
+  .sharp {
+    border-radius: 0;
+  }
+  
+  .sharp-sm {
+    border-radius: 2px;
+  }
+  
+  .sharp-md {
+    border-radius: 4px;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Professional scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--off-white);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--rust);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--dark-rust);
+}
+
+/* Professional focus states */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-[var(--rust)] focus:ring-offset-2;
+}
+
+/* Smart utility overrides for better readability and variety */
+/* Card backgrounds - Soft cream for better readability */
+.bg-white, .bg-gray-50, .bg-slate-50 {
+  background-color: var(--soft-cream) !important;
+}
+
+/* Text colors for better hierarchy */
+.text-gray-700, .text-slate-700, .text-corporate-700 {
+  color: var(--charcoal) !important;
+}
+
+.text-gray-600, .text-slate-600, .text-corporate-600 {
+  color: var(--dark-rust) !important;
+}
+
+.text-gray-500, .text-slate-500, .text-corporate-500 {
+  color: var(--warm-gray) !important;
+}
+
+/* Borders - Warm gray for subtle definition */
+.border-gray-200, .border-slate-200, .border-corporate-200 {
+  border-color: rgba(139, 115, 85, 0.2) !important;
+}
+
+/* Status colors for specific use cases */
+.text-green-600, .text-emerald-600 {
+  color: var(--sage-green) !important;
+}
+
+.text-yellow-600, .text-amber-600 {
+  color: var(--burnt-orange) !important;
+}
+
+.text-red-600 {
+  color: var(--deep-burgundy) !important;
+}
+
+.text-blue-600 {
+  color: var(--steel-blue) !important;
+}
+
+/* Background status colors */
+.bg-green-50, .bg-emerald-50 {
+  background-color: rgba(107, 124, 50, 0.1) !important;
+}
+
+.bg-yellow-50, .bg-amber-50 {
+  background-color: rgba(210, 105, 30, 0.1) !important;
+}
+
+.bg-red-50 {
+  background-color: rgba(139, 21, 56, 0.1) !important;
+}
+
+.bg-blue-50 {
+  background-color: rgba(74, 111, 165, 0.1) !important;
+}
+
+/* Make containers angular by default */
+div[class*="rounded"],
+section[class*="rounded"],
+article[class*="rounded"],
+nav[class*="rounded"],
+main[class*="rounded"],
+header[class*="rounded"],
+footer[class*="rounded"],
+[class~="rounded"] {
+  border-radius: 2px !important;
+}
+
+/* Smart button overrides for common button classes */
+button[class*="bg-gradient-to-"],
+button[class*="from-"],
+button[class*="to-"] {
+  background: linear-gradient(135deg, var(--rust) 0%, var(--dark-rust) 100%) !important;
+  color: #fff !important;
+  border-radius: 2px !important;
+}
+
+/* Override common multi-colored buttons */
+button.bg-blue-600,
+button.bg-indigo-600,
+button.bg-purple-600,
+button.bg-green-600,
+button.bg-emerald-600,
+button.bg-yellow-600,
+button.bg-amber-600,
+button.bg-red-600 {
+  background: var(--rust) !important;
+  color: #fff !important;
+  border-radius: 2px !important;
+}
+
+/* Loading states */
+.loading-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}

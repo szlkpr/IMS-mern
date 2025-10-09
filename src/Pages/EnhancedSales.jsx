@@ -373,10 +373,10 @@ const EnhancedSalesPage = ({ showAddForm = false }) => {
   );
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="max-w-7xl mx-auto p-6 space-y-8">
       {/* Enhanced Sale Form with Cart */}
       {(forceShowAddForm || showAddForm) && (
-        <div className="bg-white rounded-lg shadow-lg mb-6 overflow-hidden">
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/30 mb-6 overflow-hidden">
           {/* Header */}
           <div className="bg-gradient-to-r from-green-600 to-green-700 p-6">
             <div className="flex justify-between items-center">

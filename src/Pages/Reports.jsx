@@ -104,16 +104,16 @@ export default function Reports() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen">
       <div className="max-w-7xl mx-auto p-6 space-y-8">
         {/* Header */}
-        <div className="bg-white rounded-lg p-6 shadow-sm border">
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-white/30">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900 mb-2">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent mb-3">
                 {t('reports.businessReports')}
               </h1>
-              <p className="text-slate-600">{t('reports.comprehensiveDataInsights')}</p>
+              <p className="text-slate-600 text-lg">{t('reports.comprehensiveDataInsights')}</p>
             </div>
           </div>
         

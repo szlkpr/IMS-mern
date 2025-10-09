@@ -318,7 +318,7 @@ export default function ProductsPage({ showAddForm = false }) {
   if (error) return <div className="flex justify-center items-center h-64"><div className="text-lg text-red-600">{error}</div></div>;
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="max-w-7xl mx-auto p-6 space-y-8">
       {(forceShowAddForm || showAddForm) && (
         <AddProduct onAdd={() => {
           setRefresh(r => !r);
@@ -330,18 +330,26 @@ export default function ProductsPage({ showAddForm = false }) {
       )}
       
       {!forceShowAddForm && !showAddForm && (
-        <div className="mb-6">
-          <button
-            onClick={() => setForceShowAddForm(true)}
-            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all transform hover:scale-105 shadow-lg"
-          >
-            <span className="mr-2">+</span>
-            {t('inventory.addNewProduct')}
-          </button>
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-bold text-corporate-700">
+                {t('inventory.title')}
+              </h1>
+              <p className="text-corporate-500 mt-2">Manage your product inventory</p>
+            </div>
+            <button
+              onClick={() => setForceShowAddForm(true)}
+              className="px-6 py-3 bg-corporate-gradient text-white font-medium sharp-sm hover:opacity-90 transition-all duration-200 shadow-sm"
+            >
+              <span className="mr-2">+</span>
+              {t('inventory.addNewProduct')}
+            </button>
+          </div>
         </div>
       )}
       
-      <div className="bg-white rounded-lg shadow-lg">
+      <div className="bg-white shadow-sm border border-corporate-200">
         {/* Header with controls */}
         <div className="p-6 border-b">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">

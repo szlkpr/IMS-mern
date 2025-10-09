@@ -6,6 +6,7 @@ import saleRoutes from "./routes/sale.routes.js";
 import purchaseRoutes from "./routes/purchase.routes.js";
 import reportsRoutes from "./routes/reports.routes.js";
 import analyticsRoutes from "./routes/analytics.routes.js";
+import mlRoutes from "./routes/ml.routes.js";
 import cookieParser from "cookie-parser"
 import express from "express"
 import cors from "cors"
@@ -31,6 +32,7 @@ app.use("/api/v1/sales", saleRoutes)
 app.use("/api/v1/purchases", purchaseRoutes)
 app.use("/api/v1/reports", reportsRoutes)
 app.use("/api/v1/analytics", analyticsRoutes)
+app.use("/api/v1/ml", mlRoutes)
 
 // Global error handler middleware - must be last
 app.use(errorHandler)
