@@ -90,7 +90,7 @@ const commonOptions = {
 };
 
 // Professional color palette
-const professionalColors = {
+export const professionalColors = {
   primary: {
     main: '#3b82f6',      // Blue-500
     light: '#60a5fa',     // Blue-400
@@ -130,7 +130,7 @@ const professionalColors = {
 };
 
 // Professional chart container component
-const ChartContainer = ({ title, children, height = "h-80", showBorder = true }) => (
+export const ChartContainer = ({ title, children, height = "h-80", showBorder = true }) => (
   <div className={`${showBorder ? 'bg-white rounded-xl shadow-sm border border-slate-200' : ''} p-6 ${height}`}>
     {title && (
       <div className="mb-4">
@@ -147,7 +147,7 @@ const ChartContainer = ({ title, children, height = "h-80", showBorder = true })
 );
 
 // Enhanced empty state component
-const ChartEmptyState = ({ icon, message, subtitle, height = "h-64" }) => (
+export const ChartEmptyState = ({ icon, message, subtitle, height = "h-64" }) => (
   <div className={`flex items-center justify-center ${height}`}>
     <div className="text-center p-8 bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg border-2 border-dashed border-slate-300">
       <div className="text-6xl mb-4 opacity-60 animate-pulse">{icon}</div>
