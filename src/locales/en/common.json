@@ -309,7 +309,8 @@
       "barcodeExists": "A product with this barcode already exists. Please use a unique barcode.",
       "nameExists": "A product with this name already exists. Please use a different name or modify the existing product.",
       "duplicateProduct": "A product with similar details already exists. Please check your input."
-    }
+    },
+    "forecastDemand": "Forecast Demand"
   },
   "barcodeScanner": {
     "title": "Barcode Scanner",
@@ -630,7 +631,8 @@
     "noDataToExport": "No data to export",
     "dataExportedSuccessfully": "Data exported successfully!",
     "failedToExportSalesData": "Failed to export sales data",
-    "failedToExportInventoryData": "Failed to export inventory data"
+    "failedToExportInventoryData": "Failed to export inventory data",
+    "forecast": "Forecast"
   },
   "charts": {
     "salesTrend": "Sales Trend",
@@ -668,7 +670,15 @@
     "profitMarginsByProduct": "Profit Margins by Product",
     "noProfitDataAvailable": "No Profit Data Available",
     "profitMarginsSubtitle": "Profit margins will appear here once sales are recorded",
-    "profitMarginPercent": "Profit Margin (%)"
+    "profitMarginPercent": "Profit Margin (%)",
+    "demandForecast": "Demand Forecast",
+    "days": "Days",
+    "predictedDemand": "Predicted Demand",
+    "confidenceIntervalUpper": "Confidence Interval (Upper)",
+    "confidenceIntervalLower": "Confidence Interval (Lower)",
+    "generatingForecast": "Generating Forecast...",
+    "generateDemandForecast": "Generate Demand Forecast",
+    "clickToGenerateForecast": "Click the button to generate a demand forecast for this product."
   },
   "profile": {
     "title": "User Profile",
