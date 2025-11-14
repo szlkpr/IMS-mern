@@ -23,8 +23,8 @@ const getDashboardMetrics = asyncHandler(async (req, res) => {
             $group: {
                 _id: null,
                 totalSales: { $sum: 1 },
-                totalRevenue: { $sum: "$saleCost" },
-                averageOrderValue: { $avg: "$saleCost" }
+                totalRevenue: { $sum: "$totalAmount" },
+                averageOrderValue: { $avg: "$totalAmount" }
             }
         }
     ]);
@@ -86,7 +86,7 @@ const getDashboardMetrics = asyncHandler(async (req, res) => {
             $group: {
                 _id: "$soldProducts.productId",
                 totalQuantity: { $sum: "$soldProducts.quantity" },
-                totalRevenue: { $sum: { $multiply: ["$soldProducts.quantity", "$soldProducts.price"] } }
+                totalRevenue: { $sum: { $multiply: ["$soldProducts.quantity", "$soldProducts.unitPrice"] } }
             }
         },
         {

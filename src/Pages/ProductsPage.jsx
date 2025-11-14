@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import AddProduct from "../Components/AddProduct";
 import EditProduct from "../Components/EditProduct";
 import apiClient from "../api";
+import Modal from "../Components/ui/Modal";
+import DemandForecastChart from "../Components/DemandForecast";
 
 export default function ProductsPage({ showAddForm = false }) {
   const { t } = useTranslation();
@@ -32,6 +34,7 @@ export default function ProductsPage({ showAddForm = false }) {
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [actionLoading, setActionLoading] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [forecastingProduct, setForecastingProduct] = useState(null);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -685,6 +688,13 @@ export default function ProductsPage({ showAddForm = false }) {
                             >
                               {t('common.delete')}
                             </button>
+                            <button 
+                              onClick={() => setForecastingProduct(product)}
+                              className="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50"
+                              title={t('inventory.forecastDemand')}
+                            >
+                              {t('common.forecast')}
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -725,6 +735,13 @@ export default function ProductsPage({ showAddForm = false }) {
                               title={t('inventory.deleteProduct')}
                             >
                               {t('common.delete')}
+                            </button>
+                            <button 
+                              onClick={() => setForecastingProduct(product)}
+                              className="text-green-600 hover:text-green-900 text-sm p-1 rounded hover:bg-green-50"
+                              title={t('inventory.forecastDemand')}
+                            >
+                              {t('common.forecast')}
                             </button>
                           </div>
                         </div>
@@ -822,6 +839,13 @@ export default function ProductsPage({ showAddForm = false }) {
           }}
           onCancel={() => setEditingProduct(null)}
         />
+      )}
+
+      {/* Forecast Modal */}
+      {forecastingProduct && (
+        <Modal onClose={() => setForecastingProduct(null)}>
+          <DemandForecastChart productId={forecastingProduct._id} />
+        </Modal>
       )}
     </div>
   );

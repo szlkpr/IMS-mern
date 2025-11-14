@@ -16,3 +16,5 @@ ml-service/.ruff_cache/
 ml-service/.ipynb_checkpoints/
 k6-test-report.md
 ml-service/.coverage
+.gemini/
+gha-creds-*.json

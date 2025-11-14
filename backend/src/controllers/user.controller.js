@@ -42,18 +42,17 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(400, "User already exists")
     }
 
-    // check for avatar
+    let avatarUrl = "https://www.gravatar.com/avatar/?d=mp"; // Default avatar from schema
+
     const avatarLocalPath = req.file?.path;
 
-    if (!avatarLocalPath) {
-        throw new ApiError(400, "Please provide an avatar")
-    }
+    if (avatarLocalPath) { // Only upload if an avatar is provided
+        const uploadedAvatar = await uploadOnCloudinary(avatarLocalPath);
 
-    // upload them to cloudinary
-    const avatar = await uploadOnCloudinary(avatarLocalPath)
-
-    if (!avatar) {
-        throw new ApiError(500, "Avatar upload failed")
+        if (!uploadedAvatar) {
+            throw new ApiError(500, "Avatar upload failed");
+        }
+        avatarUrl = uploadedAvatar.url;
     }
 
     // create user object - create entry in db
@@ -63,7 +62,7 @@ const registerUser = asyncHandler(async (req, res) => {
         phone: phone || undefined,
         password,
         role: role || "sub-admin",
-        avatar: avatar.url,
+        avatar: avatarUrl, // Use the uploaded URL or default
     })
 
     // remove password and refresh token field from response
@@ -106,9 +105,14 @@ const loginUser = asyncHandler(async (req, res) => {
     }
 
     // Check if user exists: email or phone number
-    const user = await User.findOne({
-        $or: [{ email }, { phone }],
-    });
+    const query = { $or: [] };
+    if (email) {
+        query.$or.push({ email });
+    }
+    if (phone) {
+        query.$or.push({ phone });
+    }
+    const user = await User.findOne(query);
 
     if (!user) {
         console.error("User not found");
@@ -159,13 +163,13 @@ const logoutUser = asyncHandler(async (req, res) => {
         req.user._id, 
         {
             $set: {
-                refreshToken: 1
+                refreshToken: undefined
             }
         },
         {
             new: true
         }
-)
+    )
 
 const options = {
     httpOnly: true,
@@ -252,7 +256,7 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
     }
 
     const user = await User.findById(req.user?._id)
-    const isPasswordCorrect = await user.isPasswordCorrect(oldPassword)
+    const isPasswordCorrect = await user.matchPassword(oldPassword)
 
     if (!isPasswordCorrect) {
         throw new ApiError(401, "Incorrect password")

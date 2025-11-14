@@ -2,7 +2,6 @@
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { use } from "react";
 
 const userSchema = new mongoose.Schema({
     name: {

@@ -375,16 +375,32 @@ async def get_knowledge_graph_insights(product: str):
 def generate_mock_prediction(request: ForecastRequest) -> PredictionResponse:
     """Generate mock prediction for development/testing"""
     
-    # Simple trend-based prediction
-    values = [point.value for point in request.historical_data]
-    trend = np.polyfit(range(len(values)), values, 1)[0]
-    
-    predictions = []
-    base_value = values[-1]
-    
-    for i in range(request.forecast_horizon):
-        pred = base_value + (trend * (i + 1)) + np.random.normal(0, base_value * 0.1)
-        predictions.append(max(0, pred))
+    # Handle empty historical data
+    if not request.historical_data:
+        # Generate default predictions
+        predictions = [50.0] * request.forecast_horizon
+        base_value = 50.0
+        trend = 0.0
+    else:
+        # Simple trend-based prediction
+        values = [point.value for point in request.historical_data]
+        if len(values) < 2:
+            # Not enough data for trend analysis
+            predictions = [values[0] if values else 50.0] * request.forecast_horizon
+            base_value = values[0] if values else 50.0
+            trend = 0.0
+        else:
+            try:
+                trend = np.polyfit(range(len(values)), values, 1)[0]
+            except:
+                trend = 0.0
+            
+            predictions = []
+            base_value = values[-1]
+            
+            for i in range(request.forecast_horizon):
+                pred = base_value + (trend * (i + 1)) + np.random.normal(0, base_value * 0.1)
+                predictions.append(max(0, pred))
     
     return PredictionResponse(
         success=True,

@@ -225,7 +225,7 @@ const refundSale = asyncHandler(async (req, res) => {
         }
     }
 
-    await sale.remove();
+    await sale.deleteOne();
 
     return res.status(200).json(
         new ApiResponse(200, {}, "Sale refunded successfully")

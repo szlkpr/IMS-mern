@@ -14,12 +14,20 @@ export default function LoginPage({ onLoginSuccess }) {
     e.preventDefault();
     setLoginState({ loading: true, message: t('auth.loggingIn') });
     try {
-      const { data } = await apiClient.post(
+      const response = await apiClient.post(
         '/users/login',
         { email, password },
       );
+
+      // Backend wraps payload in { success, statusCode, message, data: { user, accessToken, refreshToken } }
+      const accessToken = response?.data?.data?.accessToken;
+
+      if (!accessToken) {
+        throw new Error('Invalid login response. No access token.');
+      }
+
       setLoginState({ loading: false, message: t('auth.loginSuccess') });
-      localStorage.setItem("accessToken", data.token);
+      localStorage.setItem('accessToken', accessToken);
       onLoginSuccess(); // Notify parent component of successful login
       navigate('/'); // Redirect to the dashboard
     } catch (error) {

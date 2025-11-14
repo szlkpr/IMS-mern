@@ -194,7 +194,7 @@ export default function Categories() {
               <button
                 type="submit"
                 disabled={isSubmitting || !newCategory.trim()}
-                className="px-8 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-medium rounded-lg hover:from-green-700 hover:to-green-800 transition-all transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="px-8 py-3 bg-maroon-700 text-white font-medium rounded-lg hover:bg-maroon-800 transition-all transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? t('categories.adding') : t('categories.addCategory')}
               </button>

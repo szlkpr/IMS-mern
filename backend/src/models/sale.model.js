@@ -137,7 +137,13 @@ const saleSchema = new mongoose.Schema({
     status: {
         type: String,
         enum: ['draft', 'completed', 'cancelled', 'refunded'],
-        default: 'completed'
+        default: 'completed',
+    },
+
+    // The user who made the sale (optional, for device-generated sales)
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
     }
 }, { 
     timestamps: true,

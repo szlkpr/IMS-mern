@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import apiClient from '../api';
 import axios from 'axios';
 import BarcodeScanner from '../Components/BarcodeScanner';
+import { io } from 'socket.io-client';
 
 const EnhancedSalesPage = ({ showAddForm = false }) => {
   const { t } = useTranslation();
@@ -104,6 +105,27 @@ const EnhancedSalesPage = ({ showAddForm = false }) => {
 
     return () => {
       controller.abort();
+    };
+  }, []);
+
+  // Subscribe to real-time sales updates (RFID-triggered)
+  useEffect(() => {
+    const socket = io(import.meta.env.VITE_BACKEND_WS || 'http://localhost:4200', {
+      transports: ['websocket']
+    });
+    socket.emit('subscribe-sales-alerts');
+    socket.on('new-sale', async () => {
+      try {
+        const salesResponse = await apiClient.get('/sales');
+        setSales(salesResponse.data.data.sales || []);
+        setMessage('✅ New sale recorded via RFID');
+        setTimeout(() => setMessage(''), 3000);
+      } catch (err) {
+        console.error('Failed to refresh sales after RFID event', err);
+      }
+    });
+    return () => {
+      socket.disconnect();
     };
   }, []);
 
@@ -388,7 +410,7 @@ const EnhancedSalesPage = ({ showAddForm = false }) => {
                 <button
                   type="button"
                   onClick={() => setShowScanner(true)}
-                  className="px-4 py-2 bg-white bg-opacity-20 text-white rounded-md hover:bg-opacity-30 transition-colors flex items-center gap-2"
+                  className="px-4 py-2 bg-[#800000] text-white rounded-md hover:bg-[#990000] transition-colors flex items-center gap-2"
                 >
                   📷 {t('sales.scanBarcode')}
                 </button>

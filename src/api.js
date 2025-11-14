@@ -1,7 +1,11 @@
 import axios from 'axios';
 
+// Prefer env-driven API base; fallback to local dev on port 4201
+// Note: VITE_API_URL should include the full base (e.g. http://localhost:4201/api/v1)
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4201/api/v1';
+
 const apiClient = axios.create({
-  baseURL: 'http://localhost:4200/api/v1',
+  baseURL: API_BASE,
   withCredentials: true,
 });
 
