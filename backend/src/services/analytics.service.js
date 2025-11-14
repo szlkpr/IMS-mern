@@ -1,8 +1,5 @@
 import { Product } from '../models/product.model.js';
 import { Sale } from '../models/sale.model.js';
-import { Purchase } from '../models/purchase.model.js';
-import { Category } from '../models/category.model.js';
-import mongoose from 'mongoose';
 
 class AnalyticsService {
   
@@ -1051,7 +1048,7 @@ class AnalyticsService {
         $match: {
           createdAt: { $gte: startDate, $lte: endDate },
           status: { $in: ['completed', 'paid'] },
-          customerName: { $exists: true, $ne: null, $ne: '' }
+          customerName: { $exists: true, $nin: [null, ''] }
         }
       },
       {

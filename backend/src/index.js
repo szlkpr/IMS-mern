@@ -39,7 +39,7 @@ connectDB()
         });
     })
 
-.catch((err) => {
+.catch(() => {
     // console.log("MONGO DB connection has FAILED !!! ", err)
     process.exit(1);
 })

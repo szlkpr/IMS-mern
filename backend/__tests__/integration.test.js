@@ -1,6 +1,5 @@
 import request from 'supertest';
 import app from '../src/app.js';
-import mongoose from 'mongoose';
 import { User } from '../src/models/user.model.js';
 import { Category } from '../src/models/category.model.js';
 import { Product } from '../src/models/product.model.js';
@@ -10,7 +9,7 @@ describe('Integration: auth, products, and sales', () => {
 
 	beforeEach(async () => {
 		// Seed a user
-		const user = await User.create({
+		await User.create({
 			name: 'Test Admin',
 			email: 'admin@example.com',
 			password: 'Password123!',

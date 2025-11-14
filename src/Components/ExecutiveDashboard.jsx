@@ -18,7 +18,8 @@ import {
   Eye,
   Target,
   BarChart3,
-  PieChart
+  PieChart,
+  Trophy, // Added Trophy
 } from 'lucide-react';
 import { useDashboardWebSocket } from '../services/websocketService';
 // Charts can be added later when needed
@@ -57,10 +58,11 @@ const ExecutiveDashboard = () => {
         case 'month':
           params.startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
           break;
-        case 'quarter':
+        case 'quarter': {
           const quarter = Math.floor(now.getMonth() / 3);
           params.startDate = new Date(now.getFullYear(), quarter * 3, 1).toISOString();
           break;
+        }
         case 'year':
           params.startDate = new Date(now.getFullYear(), 0, 1).toISOString();
           break;
@@ -411,7 +413,7 @@ const ExecutiveDashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-indigo-600">Today's Sales</p>
+                  <p className="text-sm font-medium text-indigo-600">Today&apos;s Sales</p>
                   <p className="text-2xl font-bold text-indigo-900">
                     {formatCurrency(realTimeMetrics.revenue || 0)}
                   </p>

@@ -1,6 +1,6 @@
 import { ApiError } from "../utils/apiError.js";
 
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, req, res, _next) => { // eslint-disable-line no-unused-vars
     let error = err;
 
     // If it's not an instance of ApiError, convert it

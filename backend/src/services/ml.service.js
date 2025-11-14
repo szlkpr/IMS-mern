@@ -17,7 +17,7 @@ class MLService {
             });
             this.isConnected = response.data.status === 'healthy';
             console.log(`ML Service connection: ${this.isConnected ? '✅ Connected' : '❌ Disconnected'}`);
-        } catch (error) {
+        } catch {
             this.isConnected = false;
             console.log('❌ ML Service not available - predictions will use fallback methods');
         }
@@ -188,7 +188,6 @@ class MLService {
             
             // Generate predictions
             const predictions = [];
-            const lastValue = values[values.length - 1];
             
             for (let i = 1; i <= forecastHorizon; i++) {
                 const predicted = Math.max(0, intercept + slope * (n + i - 1));

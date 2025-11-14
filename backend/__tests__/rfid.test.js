@@ -1,16 +1,14 @@
+import { jest } from '@jest/globals';
 import request from 'supertest';
 import app from '../src/app';
 import mongoose from 'mongoose';
-import { User } from '../src/models/user.model';
 import { Category } from '../src/models/category.model';
 import { Product } from '../src/models/product.model';
 import RfidTag from '../src/models/rfidTag.model';
-import WebSocketService from '../src/services/websocket.service';
+import WebSocketService from '../src/services/websocket.service'; // Import the actual service
 
-// Mock the WebSocketService to avoid actual WebSocket connections in tests
-jest.mock('../src/services/websocket.service.js', () => ({
-    broadcastSaleAlert: jest.fn(),
-}));
+// Mock the broadcastSaleAlert method on the imported WebSocketService instance
+jest.spyOn(WebSocketService, 'broadcastSaleAlert').mockImplementation(jest.fn());
 
 describe('RFID Endpoint: /api/v1/rfid/scan', () => {
     let product;

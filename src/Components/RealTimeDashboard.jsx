@@ -269,7 +269,7 @@ const RealTimeDashboard = () => {
             <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-2xl"></div>
             <div className="relative flex items-center justify-between">
               <div className="space-y-2">
-                <p className="text-blue-100 text-sm font-medium uppercase tracking-wide">Today's Revenue</p>
+                <p className="text-blue-100 text-sm font-medium uppercase tracking-wide">Today&apos;s Revenue</p>
                 <p className="text-3xl font-bold">{formatCurrency(realTimeMetrics?.revenue)}</p>
                 <p className="text-blue-200 text-sm flex items-center">
                   <span className="w-2 h-2 bg-blue-300 rounded-full mr-2 animate-pulse"></span>
@@ -291,7 +291,7 @@ const RealTimeDashboard = () => {
             <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-2xl"></div>
             <div className="relative flex items-center justify-between">
               <div className="space-y-2">
-                <p className="text-green-100 text-sm font-medium uppercase tracking-wide">Today's Sales</p>
+                <p className="text-green-100 text-sm font-medium uppercase tracking-wide">Today&apos;s Sales</p>
                 <p className="text-3xl font-bold">{realTimeMetrics?.salesCount?.toLocaleString() || 0}</p>
                 <p className="text-green-200 text-sm flex items-center">
                   <span className="w-2 h-2 bg-green-300 rounded-full mr-2 animate-pulse"></span>
@@ -363,7 +363,7 @@ const RealTimeDashboard = () => {
                   📈
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-slate-800">Today's Hourly Sales</h3>
+                  <h3 className="text-xl font-bold text-slate-800">Today&apos;s Hourly Sales</h3>
                   <p className="text-slate-600">Real-time sales performance</p>
                 </div>
               </div>
@@ -390,7 +390,7 @@ const RealTimeDashboard = () => {
               </div>
               <div>
                 <h3 className="text-xl font-bold text-slate-800">Top Products</h3>
-                <p className="text-slate-600">Today's bestsellers</p>
+                <p className="text-slate-600">Today&apos;s bestsellers</p>
               </div>
             </div>
             

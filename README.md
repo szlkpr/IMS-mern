@@ -1,8 +1,8 @@
-# 📦 Inventory Management System
+# Inventory Management System
 
 A comprehensive, full-stack inventory management system with advanced ML-powered forecasting and analytics capabilities. Built with modern technologies including React, Node.js, MongoDB, and Python FastAPI.
 
-## 🌟 Features
+## Features
 
 ### Core Functionality
 - **Product Management**: Complete CRUD operations with dual pricing (retail/wholesale), barcode support, and stock tracking
@@ -46,7 +46,7 @@ A comprehensive, full-stack inventory management system with advanced ML-powered
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ### Technology Stack
 
@@ -103,7 +103,7 @@ inventory/
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -210,7 +210,7 @@ NODE_ENV=production node src/index.js
 
 ---
 
-## 🔌 API Endpoints
+## API Endpoints
 
 ### Main Routes
 - `/api/v1/users` - User management
@@ -239,7 +239,7 @@ Authorization: Bearer <access_token>
 
 ---
 
-## 🧪 Testing
+## Testing
 
 ### Backend Tests
 ```bash
@@ -277,7 +277,7 @@ pytest --cov
 
 ---
 
-## 🔐 Security Features
+## Security Features
 
 ### Implemented Security Measures
 - **Helmet.js**: Security headers (CSP, X-Frame-Options)
@@ -301,7 +301,7 @@ See [SECURITY-HEADERS.md](./SECURITY-HEADERS.md) for detailed security documenta
 
 ---
 
-## 📊 Analytics & Reporting
+## Analytics & Reporting
 
 ### Available Analytics
 - **Profit Margin Analysis**: Product and category-level margins
@@ -323,7 +323,7 @@ See [SECURITY-HEADERS.md](./SECURITY-HEADERS.md) for detailed security documenta
 
 ---
 
-## 🌐 Internationalization
+## Internationalization
 
 The application supports 9 languages:
 - English (en)
@@ -342,7 +342,7 @@ Language detection is automatic based on browser settings, with manual switching
 
 ---
 
-## 📈 Performance & Scalability
+## Performance & Scalability
 
 ### Optimizations
 - MongoDB aggregation pipelines for complex queries
@@ -358,7 +358,7 @@ Language detection is automatic based on browser settings, with manual switching
 
 ---
 
-## 🗄️ Database Schema
+## Database Schema
 
 ### Main Models
 - **Product**: Inventory items with pricing, stock, and metadata
@@ -372,7 +372,7 @@ See individual model files in `backend/src/models/` for detailed schemas.
 
 ---
 
-## 🛠️ Development
+## Development
 
 ### Code Style
 - ESLint for JavaScript/React
@@ -396,15 +396,15 @@ See individual model files in `backend/src/models/` for detailed schemas.
 
 ---
 
-## 📝 License
+## License
 
 [Specify your license here]
 
-## 👥 Contributors
+## Contributors
 
 [Add contributors here]
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - React team for the excellent framework
 - Express.js for the robust backend framework
@@ -414,13 +414,13 @@ See individual model files in `backend/src/models/` for detailed schemas.
 
 ---
 
-## 📞 Support
+## Support
 
 For issues, questions, or contributions, please open an issue on the GitHub repository.
 
 ---
 
-## 🔮 Future Enhancements
+## Future Enhancements
 
 - [ ] OpenAPI/Swagger documentation
 - [ ] Docker containerization
@@ -433,7 +433,7 @@ For issues, questions, or contributions, please open an issue on the GitHub repo
 
 ---
 
-**Built with ❤️ using React, Node.js, MongoDB, and Python**
+**Built with React, Node.js, MongoDB, and Python**
 
 
 

@@ -1,5 +1,6 @@
 // Enhanced PDF Invoice Generator with Multi-item Support and Discounts
 import PDFDocument from "pdfkit";
+import { Buffer } from 'buffer';
 
 export const generatePDFInvoice = async (sale) => {
     return new Promise((resolve, reject) => {

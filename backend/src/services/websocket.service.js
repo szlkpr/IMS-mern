@@ -1,7 +1,6 @@
 import { Server } from 'socket.io';
 import { Product } from '../models/product.model.js';
 import { Sale } from '../models/sale.model.js';
-import { Purchase } from '../models/purchase.model.js';
 
 class WebSocketService {
   constructor() {
@@ -46,7 +45,7 @@ class WebSocketService {
           socket.emit('dashboard-initial-data', initialData);
           
           console.log(`User ${socket.id} subscribed to dashboard`);
-        } catch (error) {
+        } catch {
           socket.emit('error', { message: 'Failed to subscribe to dashboard' });
         }
       });

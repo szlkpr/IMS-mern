@@ -3,7 +3,6 @@ import app from '../src/app.js';
 import { User } from '../src/models/user.model.js';
 import { Category } from '../src/models/category.model.js';
 import { Product } from '../src/models/product.model.js';
-import { Sale } from '../src/models/sale.model.js';
 
 describe('Additional controller coverage', () => {
 	let token;
