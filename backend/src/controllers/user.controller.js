@@ -84,23 +84,15 @@ const registerUser = asyncHandler(async (req, res) => {
 })
 
 const loginUser = asyncHandler(async (req, res) => {
-    // Log the incoming request body for debugging
-    console.log("Request Body:", req.body);
-
     // Get user details from frontend or Postman
     const { email, phone, password } = req.body;
 
-    // Log extracted fields
-    console.log("Email:", email, "Phone:", phone, "Password:", password ? "Provided" : "Not Provided");
-
     // Validation - at least one of email or phone must be provided
     if (!email && !phone) {
-        console.error("Validation Error: Missing email or phone");
         throw new ApiError(400, "Please provide email or phone number");
     }
 
     if (!password) {
-        console.error("Validation Error: Missing password");
         throw new ApiError(400, "Please provide a password");
     }
 
@@ -115,7 +107,6 @@ const loginUser = asyncHandler(async (req, res) => {
     const user = await User.findOne(query);
 
     if (!user) {
-        console.error("User not found");
         throw new ApiError(404, "User not found");
     }
 
@@ -123,7 +114,6 @@ const loginUser = asyncHandler(async (req, res) => {
     const isPasswordCorrect = await user.matchPassword(password);
 
     if (!isPasswordCorrect) {
-        console.error("Incorrect password");
         throw new ApiError(401, "Incorrect password");
     }
 
@@ -137,8 +127,6 @@ const loginUser = asyncHandler(async (req, res) => {
         httpOnly: true,
         secure: true,
     };
-
-    console.log("Login successful for user:", loggedInUser);
 
     return res
         .status(200)
@@ -187,17 +175,12 @@ return res
 const refreshAccessToken = asyncHandler(async (req, res) => {
     const incomingRefreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
 
-    // Log the token for debugging
-    console.log("Incoming Refresh Token:", incomingRefreshToken);
-
     // Validate the token
     if (!incomingRefreshToken) {
-        console.error("Refresh token not provided");
         throw new ApiError(401, "Refresh token not provided");
     }
 
     if (typeof incomingRefreshToken !== "string" || incomingRefreshToken.split(".").length !== 3) {
-        console.error("Invalid or malformed refresh token");
         throw new ApiError(401, "Refresh token is invalid or malformed");
     }
 
@@ -211,12 +194,10 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
         const user = await User.findById(decodedToken?._id);
 
         if (!user) {
-            console.error("User not found for decoded token");
             throw new ApiError(401, "Invalid refresh token");
         }
 
         if (incomingRefreshToken !== user?.refreshToken) {
-            console.error("Refresh token mismatch");
             throw new ApiError(401, "Expired refresh token");
         }
 
@@ -242,7 +223,6 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
                 )
             );
     } catch (error) {
-        console.error("JWT Verification Error:", error.message);
         throw new ApiError(401, error?.message || "Invalid refresh token");
     }
 });

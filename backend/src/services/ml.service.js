@@ -16,10 +16,10 @@ class MLService {
                 timeout: 5000
             });
             this.isConnected = response.data.status === 'healthy';
-            console.log(`ML Service connection: ${this.isConnected ? '✅ Connected' : '❌ Disconnected'}`);
+            console.info(`ML Service connection: ${this.isConnected ? '✅ Connected' : '❌ Disconnected'}`);
         } catch {
             this.isConnected = false;
-            console.log('❌ ML Service not available - predictions will use fallback methods');
+            console.warn('❌ ML Service not available - predictions will use fallback methods');
         }
     }
 
@@ -116,7 +116,6 @@ class MLService {
             const historicalData = await this.prepareHistoricalData(productId);
             
             if (historicalData.length < 7) {
-                console.log('Insufficient historical data, using fallback prediction');
                 return this.fallbackPrediction(productId, forecastHorizon);
             }
 
